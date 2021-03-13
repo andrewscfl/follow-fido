@@ -23,6 +23,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 # Documents in collection hold all data.
 root_collection = db.collection('pets')
 
+#   --  Endpoints   --  #
 """
 Creates a new document.
 """
@@ -31,12 +32,23 @@ Creates a new document.
 def add_document() -> dict:
     
     req_obj = request.json
-    return quietcatch(_add(req_object))
+    return quietcatch(_add_user(req_object))
 
+"""
+Adds a dog to a user's document.
+"""
+@app.route('/registerdog',methods=['POST'])
+@cross_origin()
+def add_document() -> dict:
+    
+    req_obj = request.json
+    return quietcatch(_add_dog(req_object))
+
+#   --    Private methods     -- #
 """
 Attempt to add the user's data to firebase.
 """
-def _add(req_obj) -> bool:  
+def _add_user(req_obj) -> bool:  
           
     new_record = root_collection.document()
     
@@ -49,4 +61,28 @@ def _add(req_obj) -> bool:
         'dogs'      : []
     })
     
+    return True
+
+"""
+Add a dog to firebase.
+"""
+def _add_dog(req_obj) -> bool:  
+          
+    # Updating above document's contact array.
+    update_dog = root_collection.where(
+        'username', '==', req_obj['username']).stream() # TODO: Add an AND phrase to do username and hash auth.
+    
+    for doc in update_dog:
+        
+        fb_doc_id = doc.id
+        root_collection.document(fb_doc_id).update({
+            
+            "dogs" : firestore.ArrayUnion([{
+                "dogName"       : req_obj['dogName'],
+                "dogAge"        : req_obj['dogAge'],
+                "dogBio"        : req_obj['dogBio'],
+                "dogSchedule"   : []
+            }])
+        })
+            
     return True

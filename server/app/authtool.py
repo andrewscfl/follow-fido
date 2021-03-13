@@ -5,7 +5,7 @@ Generates a new salt, hash tuple.
 """
 def make_auth(username:str, passwd:str) -> tuple:
 
-    # Concatenate the username and password.
+    # Concatenate the username and password. Cast to bytes: b"password"
     userpass = bytes(username + passwd)
 
     salt = bcrypt.gensalt()
