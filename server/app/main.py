@@ -32,7 +32,7 @@ Creates a new document.
 def add_document() -> dict:
     
     req_obj = request.json
-    return quietcatch(_add_user(req_object))
+    return quietcatch(_add_user, req_obj)
 
 """
 Adds a dog to a user's document.
@@ -42,7 +42,7 @@ Adds a dog to a user's document.
 def add_document() -> dict:
     
     req_obj = request.json
-    return quietcatch(_add_dog(req_object))
+    return quietcatch(_add_dog, req_obj)
 
 #   --    Private methods     -- #
 """

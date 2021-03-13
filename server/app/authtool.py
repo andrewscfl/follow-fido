@@ -18,6 +18,7 @@ def check_hash(username:str, passwd:str, salt:str) -> str:
     
     return bcrypt.hashpw(_to_bytes(username, passwd), salt)
 
+# Convert the concatenated user-pass to bytes-like object.
 def _to_bytes(username:str, password:str) -> bytes:
     
     return (username + password).encode('utf-8')
