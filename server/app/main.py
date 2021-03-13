@@ -4,14 +4,15 @@ from flask_cors import CORS, cross_origin
 import firebase_admin
 from firebase_admin import credentials, firestore
 
+# Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
+# Flask variables (global).
 app = Flask(__name__)
-
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-#you can use this in place of db.collection('pets') since everything is in pets
-root_collection = db.collection(u'pets')
+# Documents in collection hold all data.
+root_collection = db.collection('pets')
