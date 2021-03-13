@@ -42,9 +42,11 @@ def _add(req_obj) -> bool:
     
     salt, hash = make_auth(req_obj['username'], req_obj['password'])
     
-    return new_record.set({
+    new_record.set({
         'username'  : req_obj['username'],
         'salt'      : salt,
         'hash'      : hash,
         'dogs'      : []
     })
+    
+    return True
