@@ -17,3 +17,27 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 # Documents in collection hold all data.
 root_collection = db.collection('pets')
+
+"""
+Creates a new document.
+"""
+@app.route('/create',methods=['POST'])
+@cross_origin()
+def add_document():
+        
+    req_obj = request.json
+    new_record = root_collection.document()
+    
+    salt, hash = make_auth(req_obj['username'], req_obj['password'])
+    
+    new_record.set({
+        'username'  : req_obj['username'],
+        'salt'      : salt,
+        'hash'      : hash,
+        'dogs'      : []
+    })
+    
+    # End code to store in firebase
+    return {
+        "success": True
+    }
