@@ -7,7 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 # -- Internal libraries --  #
 from tools.authtool import make_auth, check_hash
-from tools.errtool import quietcatch
+#from tools.errtool import quietcatch
 
 
 # Firebase variables (global).
@@ -32,8 +32,7 @@ Creates a new user document.
 @cross_origin()
 def create_endpoint() -> dict:
     
-    req_obj = request.json
-    return quietcatch(_add_user, req_obj)
+    return quietcatch(_add_user, request)
 
 """
 Adds a dog to a user's document.
@@ -42,11 +41,29 @@ Adds a dog to a user's document.
 @cross_origin()
 def register_dog() -> dict:
     
-    req_obj = request.json
-    return quietcatch(_add_dog, req_obj)
+    return quietcatch(_add_dog, request)
 
 
 #   --    Private methods     -- #
+"""
+Return True if the given function succeeds. If anything goes wrong, return False. 
+"""
+def quietcatch(function, request) -> dict:
+    
+    # Jsonify the request.
+    req_obj = request.json
+    
+    # If the function runs, return success.
+    try:
+        return { 
+            "success" : function(req_obj) if _authenticate(req_obj) else False 
+        }
+    
+    # Return false for any exception.
+    except Exception as e:
+        print(e)
+        return { "success" : False }
+
 """
 Attempt to add the user's data to firebase.
 """
