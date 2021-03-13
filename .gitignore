@@ -13,3 +13,5 @@
 /app/.DS_Store
 
 /server/app/sdkkey.json
+
+/server/app/__pycache__/
