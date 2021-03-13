@@ -43,10 +43,24 @@ def register_dog() -> dict:
     
     return quietcatch(_add_dog, request)
 
+"""
+Endpoint to handle login requests.
+"""
+@app.route('/login', methods=['POST'])
+@cross_origin()
+def login() -> dict:
+    
+    return quietcatch(_login, request)
+
 
 #   --    Private methods     -- #
 """
-Return True if the given function succeeds. If anything goes wrong, return False. 
+Use this in endpoints for authentication (better security) before running the
+endpoints' functions. Note that the endpoint function should have an underscore
+"_" in front of its name.
+
+Returns True if the user authenticates, and the given function succeeds. If 
+anything goes wrong, return False. 
 """
 def quietcatch(function, request) -> dict:
     
@@ -63,6 +77,12 @@ def quietcatch(function, request) -> dict:
     except Exception as e:
         print(e)
         return { "success" : False }
+
+"""
+Actual method body to handle the logins.
+"""
+def _login(req_obj) -> bool:
+    return True
 
 """
 Attempt to add the user's data to firebase.
