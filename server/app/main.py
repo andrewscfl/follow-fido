@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 import firebase_admin
 from firebase_admin import credentials, firestore
+from authtool import make_auth, check_hash
 
 # Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
