@@ -5,11 +5,8 @@ Generates a new salt, hash tuple.
 """
 def make_auth(username:str, passwd:str) -> tuple:
 
-    # Concatenate the username and password. Cast to bytes: b"password"
-    userpass = bytes(username + passwd)
-
     salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(userpass, salt)
+    hashed = bcrypt.hashpw(_to_bytes(username, passwd), salt)
     
     return salt, hashed
 
@@ -19,5 +16,8 @@ salt should come from the document field ("salt").
 """
 def check_hash(username:str, passwd:str, salt:str) -> str:
     
-    userpass = bytes(username + passwd)
-    return bcrypt.hashpw(userpass, salt)
+    return bcrypt.hashpw(_to_bytes(username, passwd), salt)
+
+def _to_bytes(username:str, password:str) -> bytes:
+    
+    return (username + password).encode('utf-8')
