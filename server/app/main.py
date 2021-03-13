@@ -28,7 +28,7 @@ Creates a new document.
 """
 @app.route('/create',methods=['POST'])
 @cross_origin()
-def add_document() -> dict:
+def create_endpoint() -> dict:
     
     req_obj = request.json
     return quietcatch(_add_user, req_obj)
@@ -38,7 +38,7 @@ Adds a dog to a user's document.
 """
 @app.route('/registerdog',methods=['POST'])
 @cross_origin()
-def add_document() -> dict:
+def register_dog() -> dict:
     
     req_obj = request.json
     return quietcatch(_add_dog, req_obj)
