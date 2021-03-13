@@ -26,7 +26,7 @@ root_collection = db.collection('pets')
 
 #   --  Endpoints   --  #
 """
-Creates a new document.
+Creates a new user document.
 """
 @app.route('/create',methods=['POST'])
 @cross_origin()
