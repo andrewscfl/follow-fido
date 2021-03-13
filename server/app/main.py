@@ -1,14 +1,13 @@
 import json
 # -- Flask libraries --     #
-from server.app.errtool import simple_catch
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
 # -- Firebase libraries --  #
 import firebase_admin
 from firebase_admin import credentials, firestore
 # -- Internal libraries --  #
-from authtool import make_auth, check_hash
-from errtool import quietcatch
+from tools.authtool import make_auth, check_hash
+from tools.errtool import quietcatch
 
 # Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
