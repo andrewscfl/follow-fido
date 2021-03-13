@@ -5,11 +5,6 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from authtool import make_auth, check_hash
 
-<<<<<<< HEAD
-from authtool import make_auth, check_hash
-
-=======
->>>>>>> main
 # Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
 firebase_admin.initialize_app(cred)
@@ -24,31 +19,33 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 root_collection = db.collection(u'pets')
 
 #TODO comment here
-@app.route('/createsnap', methods=['POST'])
+@app.route('/createsnapshot', methods=['POST'])
 @cross_origin()
 def auth_snapshot():
     print('got request')
     req_obj = request.json
     print(req_obj)
 
-    make_auth()
+    username = req_obj['username']
+    password = req_obj['password']
+    salt = db.collection(u'pets').get()['hash']
 
-    #grab data if true
-    return{
-        try:
-            "success" : True
-            "data" : #??????????????
-        except:
-            "success" : False
-    }
+    docs = db.collection(u'pets').where(u'username', '==', username).stream()
+    for doc in docs:
+        toDict = doc.to_dict()
+        make_auth(username, password, salt)
+        if username == toDict['username'] and password == toDict['password']:
+            return{
+                "success" : True
+                "data" : #array of dogs
+            }
 
+def delete_dog()
+    print('got request')
+    req_obj = request.json
+    print(req_obj)
 
-
-
-
-
-
-
+    dog_name = req_obj['dog_Name']
 
 #for excersise, meds, feeding, walks...
 # def schedule_dog():
