@@ -53,6 +53,8 @@ def _add_user(req_obj) -> bool:
     
     salt, hash = make_auth(req_obj['username'], req_obj['password'])
     
+    print("salt: {}\nhash: {}".format(salt, hash))
+    
     new_record.set({
         'username'  : req_obj['username'],
         'salt'      : salt,
@@ -76,7 +78,7 @@ def _add_dog(req_obj) -> bool:
         fb_doc_id = doc.id
         root_collection.document(fb_doc_id).update({
             
-            "dogs" : firestore.ArrayUnion([{
+            "dogs"  : firestore.ArrayUnion([{
                 "dogName"       : req_obj['dogName'],
                 "dogAge"        : req_obj['dogAge'],
                 "dogBio"        : req_obj['dogBio'],
