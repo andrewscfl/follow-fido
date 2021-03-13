@@ -15,3 +15,31 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 #you can use this in place of db.collection('pets') since everything is in pets
 root_collection = db.collection(u'pets')
+
+@app.route('/post', methods=['POST'])
+@cross_origin()
+#for excersise, meds, feeding, walks...
+# def schedule_dog():
+#     print('got request')
+#     req_obj = request.json
+#     print(req_obj)
+
+# # #if houry
+# #     #make new
+# #     new_schedule = root_collection.document()
+# #     new_schedule.set({
+# #         'dogName' : req_obj['eventName'],
+# #         'dogAge' : req_obj['eventDesc'],
+# #         'dogBio' : req_obj['dogBio'],
+# #         "dogSchedule":[]
+# #     })
+
+# #     return{
+# #         try:
+# #             "success" : True
+# #         except:
+# #             "success" : False
+# #     }
+
+
+
