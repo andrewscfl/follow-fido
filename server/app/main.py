@@ -262,7 +262,7 @@ def _delete_dog(req_obj):
                 print('updated')
                 return True
 
-
+#UNFINISHED
 #extra thing for quietcatch
 @app.route('/deletedog', methods=['POST'])
 @cross_origin()
@@ -288,9 +288,9 @@ def _delete_schedule(req_obj):
             for i in range(len(obj_ref['dogSchedule'])):
                 print('in ds for loop')
                 #if EVENT name matches, delet the thing from array
-                if eventname == obj_ref['dogSchedule'][j]['eventName']:
+                if eventname == obj_ref['dogSchedule'][i]['eventName']:
                     print('event found')
-                    obj_ref['dogSchedule'].pop(j)
+                    obj_ref['dogSchedule'].pop(i)
                     print("EVENT is delet")
                     # print(doc.id)
                     temp = db.collection(u'schedule').document(doc.id)
