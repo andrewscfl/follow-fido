@@ -212,16 +212,16 @@ def _snapshot(req_obj):
     print(req_obj)
     username = req_obj['username']
 
+    #grabs list of docs where matching username is true
     docs = db.collection(u'pets').where(u'username', '==', username).stream()
     for doc in docs:
         new_dict = doc.to_dict()['dogs']
-        #take out username and passw
-        new_dict.pop(username)
-        print("username gone")
-        new_dict.pop(req_obj['password'])
-        print("password gone")
 
-    return new_dict
+        # return new_dict (list of dogs) if authenticated
+        return {
+            "success": True,
+            "data" : new_dict
+        }
 
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
