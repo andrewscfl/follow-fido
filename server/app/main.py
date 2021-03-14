@@ -21,7 +21,7 @@ cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 #you can use this in place of db.collection('pets') since everything is in pets
-root_collection = db.collection(u'pets')
+root_collection = db.collection('pets')
 
 
 #   --  Endpoints   --  #
@@ -184,8 +184,7 @@ def _authenticate(req_json) -> bool:
 
 """
 Returns True if the stored hash matches the checked hash.
-Note: Do not label "single" to the data type. It's whatever
-data type "single" is from _authenticate.
+Note: Leave "single" unlabeled.
 """
 def _compare_hash(single, username, passwd) -> bool:
     
