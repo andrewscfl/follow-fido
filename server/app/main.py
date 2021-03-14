@@ -229,11 +229,17 @@ def _delete_schedule(req_obj) -> bool:
 
 def _delete_sched_doc(sched, req_obj) -> bool:
     
-    sd = sched[0].get('dogSchedule').to_dict()
+    sd = sched[0].get('dogSchedule')
+    new_sched = []
     
-    for i, _ in enumerate(sd):
-        print(sd[i]['eventName'])
-    
+    for e in sd:
+        if e['eventName'] != req_obj['eventName']:
+            new_sched.append(e)
+            
+    root_schedule.document(sched[0].id).update({
+        "dogSchedule"   :   new_sched
+    })
+        
     return True
 
 """
