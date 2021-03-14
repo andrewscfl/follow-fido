@@ -1,4 +1,4 @@
-import json, os
+import os
 # -- Flask libraries --     #
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -57,6 +57,15 @@ def login() -> dict:
     print(snap)
     return snap
 
+"""
+Endpoint to add a schedule to a dog.
+"""
+@app.route('/scheduledog', methods=['POST'])
+@cross_origin()
+def schedule_dog() -> dict:
+    
+    return quietcatch(_schedule_dog, request)
+
 
 #   --    Private methods     -- #
 """
@@ -83,13 +92,6 @@ def quietcatch(function, request) -> dict:
     
     # Package the success status in JSON syntax.
     return { "success" : stat }
-
-"""
-Actual method body to handle the logins.
-"""
-def _login(req_obj) -> bool:
-    print("Login successful")
-    return True    
 
 """
 Only create the user if they don't exist.
@@ -160,7 +162,51 @@ def _add_dog(user, req_obj) -> bool:
          }])
     })
     
-    print("Dog <{}> added.".format(rej_obj['dogName']))
+    print("Dog <{}> added.".format(req_obj['dogName']))
+    return True
+
+"""
+Add a dog's event to firebase.
+"""
+def _schedule_dog(req_obj) -> bool:  
+          
+    # Updating above document's contact array.
+    user = [r for r in root_collection.where(
+        'username', '==', req_obj['username']).stream()]
+    
+    print("update_dog: type={}, data=<{}>".format(type(user), user))
+    
+    return _add_to_schedule(user, req_obj) if len(user) == 1 else False
+
+"""
+Insert an event to the user's document. Note that the user parameter is
+a one-sized list. (Prevents an IndexError in the prev. function)
+"""
+def _add_to_schedule(user, req_obj) -> bool:
+    
+    dogs = user[0].to_dict()['dogs']
+    
+    key = -1
+    i = 0
+    while (key < 0):
+        key = i if dogs[i]['dogName'] == req_obj['dogName'] else -1
+        i += 1
+    
+    print(req_obj['newEvent'])
+    dogs[key]['dogSchedule'].append(req_obj['newEvent'])
+    print(dogs[key]['dogSchedule'])
+    
+    root_collection.document(user[0].id).update({
+            
+        "dogs"  : firestore.ArrayUnion([{
+            "dogName"       : req_obj['dogName'],
+            "dogAge"        : req_obj['dogAge'],
+            "dogBio"        : req_obj['dogBio'],
+            "dogSchedule"   : req_obj['dogSchedule']
+         }])
+    })
+    
+    print("Dog <{}> added.".format(req_obj['dogName']))
     return True
 
 """
@@ -216,17 +262,18 @@ def _snapshot(req_obj):
     print(req_obj)
     username = req_obj['username']
 
-    #grabs list of docs where matching username is true
+    # Grabs list of docs where matching username is true
     docs = db.collection(u'pets').where(u'username', '==', username).stream()
     for doc in docs:
         new_dict = doc.to_dict()['dogs']
 
-        # return new_dict (list of dogs) if authenticated
+        # Return new_dict (list of dogs) if authenticated
         if _authenticate(req_obj):
             return {
                 "success": True,
                 "data" : new_dict
             }
+            
         else:
             return { "success" : False }
 
