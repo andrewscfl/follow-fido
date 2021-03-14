@@ -43,7 +43,7 @@ Adds a dog to a user's document.
 @cross_origin()
 def register_dog() -> dict:
     
-    return quietcatch(_add_dog, request)
+    return quietcatch(_register_dog, request)
 
 """
 Endpoint to handle login requests.
@@ -131,25 +131,32 @@ def _add_user(req_obj) -> bool:
 """
 Add a dog to firebase.
 """
-def _add_dog(req_obj) -> bool:  
+def _register_dog(req_obj) -> bool:  
           
     # Updating above document's contact array.
-    update_dog = root_collection.where(
-        'username', '==', req_obj['username']).stream()
+    user = [r for r in root_collection.where(
+        'username', '==', req_obj['username']).stream()]
     
-    for doc in update_dog:
-        
-        fb_doc_id = doc.id
-        root_collection.document(fb_doc_id).update({
+    print("update_dog: type={}, data=<{}>".format(type(user), user))
+    
+    return _add_dog(user, req_obj) if len(user) == 1 else False
+
+"""
+Insert a dog to the user's document. Note that the user parameter is
+a one-sized list. (Prevents an IndexError in the prev. function)
+"""
+def _add_dog(user, req_obj) -> bool:
+    
+    root_collection.document(user[0].id).update({
             
-            "dogs"  : firestore.ArrayUnion([{
-                "dogName"       : req_obj['dogName'],
-                "dogAge"        : req_obj['dogAge'],
-                "dogBio"        : req_obj['dogBio'],
-                "dogSchedule"   : []
-            }])
-        })
-            
+        "dogs"  : firestore.ArrayUnion([{
+            "dogName"       : req_obj['dogName'],
+            "dogAge"        : req_obj['dogAge'],
+            "dogBio"        : req_obj['dogBio'],
+            "dogSchedule"   : []
+         }])
+    })
+    
     return True
 
 """
