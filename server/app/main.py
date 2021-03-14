@@ -261,3 +261,38 @@ def _delete_dog(req_obj):
 @cross_origin()
 def delete_dog():
     return quietcatch(_delete_dog, request)
+
+#THIS IS UNFINISHED, UPDATE TOMORROW
+#delete SCHEDULE method 
+def _delete_schedule(req_obj):
+    print('got request')
+    print(req_obj)
+    username = req_obj['username']
+    dogname = req_obj['dogName']
+    eventname = req_obj['eventName']
+
+    #check if username matches
+    docs = db.collection(u'pets').where(u'username', '==', username).stream()
+    for doc in docs:
+        obj_ref = doc.to_dict()
+        print('for loop here')
+        #loop thru array of 'dogs'
+        for i in range(len(obj_ref['dogSchedule'])):
+            print('running 2nd for loop')
+            #if EVENT name matches, delet the thing from array
+            if eventname == obj_ref['dogSchedule'][i]['eventName']:
+                print('found')
+                obj_ref['dogSchedule'].pop(i)
+                print("EVENT is delet")
+                # print(doc.id)
+                temp = db.collection(u'pets').document(doc.id)
+                temp.update({'dogSchedule' : obj_ref['dogSchedule']})
+                print('updated')
+                return True
+
+
+#extra thing for quietcatch
+@app.route('/deleteschedule', methods=['POST'])
+@cross_origin()
+def delete_schedule():
+    return quietcatch(_delete_schedule, request)
