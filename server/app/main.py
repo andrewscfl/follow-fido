@@ -192,8 +192,16 @@ def _add_to_schedule(user, req_obj) -> bool:
         key = i if dogs[i]['dogName'] == req_obj['dogName'] else -1
         i += 1
     
-    print(req_obj['newEvent'])
-    dogs[key]['dogSchedule'].append(req_obj['newEvent'])
+    new_event = [
+        req_obj['day'],
+        req_obj['hour'],
+        req_obj['eventName'],
+        req_obj['eventDesc']
+    ]
+    
+    sched = dogs[key]['dogSchedule']
+    sched.append(new_event)
+    
     print(dogs[key]['dogSchedule'])
     
     root_collection.document(user[0].id).update({
@@ -202,7 +210,7 @@ def _add_to_schedule(user, req_obj) -> bool:
             "dogName"       : req_obj['dogName'],
             "dogAge"        : req_obj['dogAge'],
             "dogBio"        : req_obj['dogBio'],
-            "dogSchedule"   : req_obj['dogSchedule']
+            "dogSchedule"   : sched
          }])
     })
     
