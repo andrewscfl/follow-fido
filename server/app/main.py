@@ -10,8 +10,6 @@ from tools.authtool import make_auth, check_hash
 from tools.errtool import catchnoauth
 
 
-# TODO: Remove needless print statements at the end!
-
 # Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
 firebase_admin.initialize_app(cred)
@@ -24,60 +22,6 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 #you can use this in place of db.collection('pets') since everything is in pets
 root_collection = db.collection(u'pets')
-
-#TODO comment here
-# @app.route('/createsnapshot', methods=['POST'])
-# @cross_origin()
-# def auth_snapshot():
-#     print('got request')
-#     req_obj = request.json
-#     print(req_obj)
-
-    
-
-    # docs = db.collection(u'pets').where(u'username', '==', username).stream()
-    # for doc in docs:
-
-    #     _authenticate()
-    #     if username == toDict['username'] and password == toDict['password']:
-    #         return{
-    #             "success" : True
-    #             "data" : #array of dogs
-    #         }
-
-# def delete_dog()
-#     print('got request')
-#     req_obj = request.json
-#     print(req_obj)
-
-#     dog_name = req_obj['dog_Name']
-
-#     _authenticate(dog_name)
-
-
-#for excersise, meds, feeding, walks...
-# def schedule_dog():
-#     print('got request')
-#     req_obj = request.json
-#     print(req_obj)
-
-# # #if houry
-# #     #make new
-# #     new_schedule = root_collection.document()
-# #     new_schedule.set({
-# #         'dogName' : req_obj['eventName'],
-# #         'dogAge' : req_obj['eventDesc'],
-# #         'dogBio' : req_obj['dogBio'],
-# #         "dogSchedule":[]
-# #     })
-
-# #     return{
-# #         try:
-# #             "success" : True
-# #         except:
-# #             "success" : False
-# #     }
-
 
 
 #   --  Endpoints   --  #
@@ -211,6 +155,7 @@ def _add_dog(user, req_obj) -> bool:
          }])
     })
     
+    print("Dog <{}> added.".format(rej_obj['dogName']))
     return True
 
 """
