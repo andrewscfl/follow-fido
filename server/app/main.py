@@ -24,6 +24,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 #you can use this in place of db.collection('pets') since everything is in pets
 root_collection = db.collection('pets')
+root_schedule   = db.collection('schedule')
 
 
 #   --  Endpoints   --  #
@@ -158,63 +159,59 @@ def _add_dog(user, req_obj) -> bool:
             "dogName"       : req_obj['dogName'],
             "dogAge"        : req_obj['dogAge'],
             "dogBio"        : req_obj['dogBio'],
-            "dogSchedule"   : []
+            #"dogSchedule"   : []
          }])
     })
-    
+                
     print("Dog <{}> added.".format(req_obj['dogName']))
+    return _create_dog_sched(req_obj)
+
+
+def _create_dog_sched(req_obj) -> bool:
+    
+    new_record = root_schedule.document()
+        
+    new_record.set({
+        'ownerName'   : req_obj['username'],
+        'dogName'     : req_obj['dogName'],
+        'dogSchedule' : []
+    })
+    
     return True
 
 """
 Add a dog's event to firebase.
 """
 def _schedule_dog(req_obj) -> bool:  
-          
+        
     # Updating above document's contact array.
-    user = [r for r in root_collection.where(
-        'username', '==', req_obj['username']).stream()]
+    sched = [r for r in root_schedule.where(
+        'ownerName', '==', req_obj['username']).stream()]
+
+    print("update_dog: type={}, data=<{}>".format(type(sched), sched))
     
-    print("update_dog: type={}, data=<{}>".format(type(user), user))
-    
-    return _add_to_schedule(user, req_obj) if len(user) == 1 else False
+    print(len(sched))
+    return _add_to_schedule(sched, req_obj) if len(sched) == 1 else False
 
 """
 Insert an event to the user's document. Note that the user parameter is
 a one-sized list. (Prevents an IndexError in the prev. function)
 """
-def _add_to_schedule(user, req_obj) -> bool:
-    
-    dogs = user[0].to_dict()['dogs']
-    
-    key = -1
-    i = 0
-    while (key < 0):
-        key = i if dogs[i]['dogName'] == req_obj['dogName'] else -1
-        i += 1
-    
-    new_event = [
-        req_obj['day'],
-        req_obj['hour'],
-        req_obj['eventName'],
-        req_obj['eventDesc']
-    ]
-    
-    sched = dogs[key]['dogSchedule']
-    sched.append(new_event)
-    
-    print(dogs[key]['dogSchedule'])
-    
-    root_collection.document(user[0].id).update({
+def _add_to_schedule(sched, req_obj) -> bool:
+   
+    print(req_obj['eventDesc']) 
+    print(sched[0].id)
+    root_schedule.document(sched[0].id).update({
             
-        "dogs"  : firestore.ArrayUnion([{
-            "dogName"       : req_obj['dogName'],
-            "dogAge"        : req_obj['dogAge'],
-            "dogBio"        : req_obj['dogBio'],
-            "dogSchedule"   : sched
+        "dogSchedule"  : firestore.ArrayUnion([{
+            "day"       : req_obj['day'],
+            "hour"      : req_obj['hour'],
+            "eventName" : req_obj['eventName'],
+            "eventDesc" : req_obj['eventDesc']
          }])
     })
-    
-    print("Dog <{}> added.".format(req_obj['dogName']))
+      
+    print("Event <{}> added.".format(req_obj['eventName']))
     return True
 
 """
