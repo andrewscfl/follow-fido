@@ -189,10 +189,10 @@ def _compare_hash(single, username, passwd) -> bool:
 
 
 #actual method
-def _auth_snapshot(req_obj):
+def snapshot(req_obj):
     print('got request')
     print(req_obj)
-    username = req_json['username']
+    username = req_obj['username']
 
     docs = db.collection(u'pets').where(u'username', '==', username).stream()
     for doc in docs:
@@ -200,13 +200,13 @@ def _auth_snapshot(req_obj):
         #take out username and passw
         new_dict.pop(username)
         print("username gone")
-        new_dict.pop(req_json['password'])
+        new_dict.pop(req_obj['password'])
         print("password gone")
 
     return new_dict
 
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
-def auth_snapshot():
+def snapshot():
     req_obj = request.json
     return quietcatch(_auth_snapshot, req_obj)
