@@ -1,4 +1,4 @@
-import json
+import json, os
 # -- Flask libraries --     #
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -10,8 +10,10 @@ from tools.authtool import make_auth, check_hash
 from tools.errtool import catchnoauth
 
 
-# Firebase variables (global).
-cred = credentials.Certificate(".\sdkkey.json")
+# Firebase variables (global). Look in current directory.
+cred = credentials.Certificate(
+    os.path.join(os.getcwd(), "sdkkey.json"))
+
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 
@@ -50,7 +52,10 @@ Endpoint to handle login requests.
 @cross_origin()
 def login() -> dict:
     
-    return quietcatch(_login, request)
+    #return quietcatch(_login, request)
+    snap = _snapshot(request.json)
+    print(snap)
+    return snap
 
 
 #   --    Private methods     -- #
@@ -217,10 +222,13 @@ def _snapshot(req_obj):
         new_dict = doc.to_dict()['dogs']
 
         # return new_dict (list of dogs) if authenticated
-        return {
-            "success": True,
-            "data" : new_dict
-        }
+        if _authenticate(req_obj):
+            return {
+                "success": True,
+                "data" : new_dict
+            }
+        else:
+            return { "success" : False }
 
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
