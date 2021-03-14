@@ -7,7 +7,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 # -- Internal libraries --  #
 from tools.authtool import make_auth, check_hash
-#from tools.errtool import quietcatch
+from tools.errtool import catchnoauth
 
 
 # Firebase variables (global).
@@ -28,16 +28,27 @@ root_collection = db.collection('pets')
 """
 Creates a new user document.
 """
-@app.route('/create',methods=['POST'])
+@app.route('/create', methods=['POST'])
 @cross_origin()
 def create_endpoint() -> dict:
     
-    return quietcatch(_add_user, request)
+    return catchnoauth(_create, request.json)
+    """
+    # Can't authenticate a user who doesn't exist.
+    try:
+        stat = _create(request.json)
+    
+    except Exception as e:
+        print(str(e))
+        stat = False
+        
+    return { "success" : stat }
+    """
 
 """
 Adds a dog to a user's document.
 """
-@app.route('/registerdog',methods=['POST'])
+@app.route('/registerdog', methods=['POST'])
 @cross_origin()
 def register_dog() -> dict:
     
@@ -69,20 +80,40 @@ def quietcatch(function, request) -> dict:
     
     # If the function runs, return success.
     try:
-        return { 
-            "success" : function(req_obj) if _authenticate(req_obj) else False 
-        }
+        stat = function(req_obj) if _authenticate(req_obj) else False 
     
     # Return false for any exception.
     except Exception as e:
-        print(e)
-        return { "success" : False }
+        print(str(e))
+        stat = False
+    
+    # Package the success status in JSON syntax.
+    return { "success" : stat }
 
 """
 Actual method body to handle the logins.
 """
 def _login(req_obj) -> bool:
-    return True
+    return True    
+
+"""
+Only create the user if they don't exist.
+"""
+def _create(req_obj) -> bool:
+    
+    return False if _user_exists(req_obj['username']) else _add_user(req_obj)
+
+"""
+Check whether or not a user exists in the database.
+"""
+def _user_exists(username:str) -> bool:
+    
+    single = [r for r in root_collection.where(
+        "username", "==", username).stream()]
+
+    print("Username is taken" if len(single) > 0 else "Creating user.")    
+    
+    return True if len(single) > 0 else False
 
 """
 Attempt to add the user's data to firebase.
@@ -112,7 +143,7 @@ def _add_dog(req_obj) -> bool:
           
     # Updating above document's contact array.
     update_dog = root_collection.where(
-        'username', '==', req_obj['username']).stream() # TODO: Add an AND phrase to do username and hash auth.
+        'username', '==', req_obj['username']).stream()
     
     for doc in update_dog:
         
@@ -139,10 +170,14 @@ def _authenticate(req_json) -> bool:
     passwd = req_json['password']
     
     # Should return either 0 or 1 documents.
-    single = root_collection.where(
-        "username", "==", username).stream()
-    
+    single = [r for r in root_collection.where(
+        "username", "==", username).stream()]
+        
     num_docs = len(single)
+    
+    print("single: type={}, len={}".format(single, num_docs))
+
+    # Throw an error message if more than one doc is detected.
     print("WARNING: {} docs found. Address this in the database.".format(
         num_docs) if num_docs > 1 else "{} document(s) found.".format(num_docs)
     )
@@ -162,5 +197,7 @@ def _compare_hash(single, username, passwd) -> bool:
     fb_hash = stored['hash']
         
     req_hash = check_hash(username, passwd, fb_salt)
+    
+    print("Hash from user: {}\nHash from db: {}".format(stored, req_hash))
         
     return True if req_hash == fb_hash else False
