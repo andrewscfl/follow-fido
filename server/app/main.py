@@ -78,10 +78,6 @@ root_collection = db.collection(u'pets')
 
 
 
-# Documents in collection hold all data.
-root_collection = db.collection('pets')
-
-
 #   --  Endpoints   --  #
 """
 Creates a new user document.

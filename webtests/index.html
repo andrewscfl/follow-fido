@@ -123,7 +123,7 @@
                   </div>
                 
                 <button type="submit" class="btn btn-default" id="regEND">Submit</button>
-                <div id="login-output"></div>
+                <div id="registerOutput"></div>
               <script>
                   document.querySelector('#regEND').addEventListener('click', ()=>{
                       let username = document.querySelector('#username-register-dog').value;
@@ -140,7 +140,7 @@
                           "dogBio": dogBio,
                           "dogSchedule" : []
                       };
-                      fetch('http://localhost:5000/login', {
+                      fetch('http://localhost:5000/registerdog', {
                           method: 'POST',
                           headers: {
                               'Content-Type': 'application/json'
@@ -149,9 +149,9 @@
                           body: JSON.stringify(request)
                       }).then(res => res.json()).then(res => {
                           if(res.success)
-                            document.querySelector('#login-output').innerHTML = "successful";
+                            document.querySelector('#registerOutput').innerHTML = "successful";
                         else{
-                            document.querySelector('#login-output').innerHTML = "failed";
+                            document.querySelector('#registerOutput').innerHTML = "failed";
 
                         }
                       });
@@ -278,5 +278,122 @@
         </div>
         <hr>
 
+
+        <div class="container">
+            <h2>Test for /deletedog endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="del-dog-username">username</label>
+                  <input type="text" class="form-control" id="del-dog-username" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="del-dog-password">password</label>
+                    <input type="text" class="form-control" id="del-dog-password" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-dog-name">dogName</label>
+                    <input type="text" class="form-control" id="del-dog-name" placeholder="dog name">
+                  </div>
+
+                
+                <button type="submit" class="btn btn-default" id="deldogEND">Submit</button>
+                <div id="del-dog-output"></div>
+              <script>
+                  document.querySelector('#deldogEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#del-dog-username').value;
+                      let password = document.querySelector('#del-dog-password').value;
+                      let dogName = document.querySelector('#del-dog-name').value;
+                      
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName
+                      };
+                      fetch('http://localhost:5000/deletedog', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#del-dog-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#del-dog-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+
+
+        <div class="container">
+            <h2>Test for /deleteschedule endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="del-schedule-username">username</label>
+                  <input type="text" class="form-control" id="del-schedule-username" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="del-schedule-password">password</label>
+                    <input type="text" class="form-control" id="del-schedule-password" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-schedule-dog-name">dogName</label>
+                    <input type="text" class="form-control" id="del-schedule-dog-name" placeholder="dog name">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-schedule-event-name">dogName</label>
+                    <input type="text" class="form-control" id="del-schedule-event-name" placeholder="dog name">
+                  </div>
+
+                
+                <button type="submit" class="btn btn-default" id="delschedEND">Submit</button>
+                <div id="del-schedule-output"></div>
+              <script>
+                  document.querySelector('#delschedEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#del-schedule-username').value;
+                      let password = document.querySelector('#del-schedule-password').value;
+                      let dogName = document.querySelector('#del-schedule-dog-name').value;
+                      let eventName = document.querySelector('#del-schedule-event-name').value;
+                      
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName,
+                          "eventName": eventName
+                      };
+                      fetch('http://localhost:5000/deleteschedule', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#del-schedule-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#del-schedule-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+<style>
+    hr{
+        border-top: 12px solid #d2d2d2;
+    }
+</style>
     </body>
 </html>
