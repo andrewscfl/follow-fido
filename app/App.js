@@ -19,50 +19,11 @@ class App extends React.Component {
       "dogAge": null,
       "dogBio": null,
 
-      dogs: [{
-        "dogName": "spot",
-        "dogAge": 2,
-        "dogBio": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the ",
-        "dogSchedule": [
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "taking a shit on the carpet",
-            "eventDesc": "*violent sound of shitting*"
-
-          },
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "lick my own ass",
-            "eventDesc": "yum"
-
-          },
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "eat shoes",
-            "eventDesc": "delicious"
-
-          }
-        ]
-      }, {
-        "dogName": "Levi",
-        "dogAge": 6,
-        "dogBio": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the ",
-        "dogSchedule": [
-          {
-            "day": 2,
-            "time": 1100,
-            "eventName": "bark In The park",
-            "eventDesc": "a dog barks in the park or smth idk"
-
-          }
-        ]
-      },]
-    }
-
+      dogs: []
   }
+}
+
+  
 
   HomeScreenCardHelper = (navigate) => {
     let returnVal = this.state.dogs.map((dog) => {
@@ -77,7 +38,7 @@ class App extends React.Component {
 
   CaroselCardHelper = (routeData) => {
     let cardList = routeData.dogSchedule.map((eventVar) => {
-      return(<CaroselCard day={eventVar.day} time={eventVar.time} name={eventVar.eventName} desc={eventVar.eventDesc} />);
+      return (<CaroselCard day={eventVar.day} time={eventVar.time} name={eventVar.eventName} desc={eventVar.eventDesc} />);
     });
     return cardList;
   }
@@ -217,6 +178,17 @@ class App extends React.Component {
         }}
           onPress={() => {
             //CODE HERE FOR POSTING UP REGISTRATION
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/registerdog', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({"username" : this.state.username, "password" : this.state.password, "dogName" : this.state.dogName, "dogAge": this.state.dogAge, "dogBio" : this.state.dogBio, "dogSchedule" : []})
+            }).then(res => res.json()).then(res => {
+              console.log(res);
+            }).catch();
+
           }}
 
         >
@@ -287,9 +259,38 @@ class App extends React.Component {
 
         }}
           onPress={() => {
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({"username" : this.state.username, "password" : this.state.password})
+            }).then(res => res.json()).then(res => {
+              if(res.success){
+                
+              }
+            }).catch();
+
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/snapshot', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({"username" : this.state.username, "password" : this.state.password})
+            }).then(res => res.json()).then(res => {
+              console.log(res);
+              if(res.success){
+                this.setState({loggedIn : true});
+                this.setState({ dogs: res.data });
+                navigate('Home')
+              }
+            }).catch();
+
+
             //CODE HERE FOR POSTING UP Login for simplicities sake this will treat as if it worked
-            this.setState({ loggedIn: true });
-            navigate('Home')
+            
           }}
 
         >
