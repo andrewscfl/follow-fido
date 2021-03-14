@@ -24,12 +24,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 root_collection = db.collection(u'pets')
 
 #TODO comment here
-@app.route('/createsnapshot', methods=['POST'])
-@cross_origin()
-def auth_snapshot():
-    print('got request')
-    req_obj = request.json
-    print(req_obj)
+# @app.route('/createsnapshot', methods=['POST'])
+# @cross_origin()
+# def auth_snapshot():
+#     print('got request')
+#     req_obj = request.json
+#     print(req_obj)
 
     
 
@@ -43,14 +43,14 @@ def auth_snapshot():
     #             "data" : #array of dogs
     #         }
 
-def delete_dog()
-    print('got request')
-    req_obj = request.json
-    print(req_obj)
+# def delete_dog()
+#     print('got request')
+#     req_obj = request.json
+#     print(req_obj)
 
-    dog_name = req_obj['dog_Name']
+#     dog_name = req_obj['dog_Name']
 
-    _authenticate(dog_name)
+#     _authenticate(dog_name)
 
 
 #for excersise, meds, feeding, walks...
@@ -76,10 +76,6 @@ def delete_dog()
 # #             "success" : False
 # #     }
 
-
-
-# Documents in collection hold all data.
-root_collection = db.collection('pets')
 
 
 #   --  Endpoints   --  #
