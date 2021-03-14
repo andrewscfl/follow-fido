@@ -189,7 +189,7 @@ def _compare_hash(single, username, passwd) -> bool:
 
 
 #actual method
-def snapshot(req_obj):
+def _snapshot(req_obj):
     print('got request')
     print(req_obj)
     username = req_obj['username']
@@ -208,5 +208,4 @@ def snapshot(req_obj):
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
 def snapshot():
-    req_obj = request.json
-    return quietcatch(_auth_snapshot, req_obj)
+    return _snapshot(request.json)
