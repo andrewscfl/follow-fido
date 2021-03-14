@@ -160,7 +160,7 @@ def _add_dog(user, req_obj) -> bool:
          }])
     })
     
-    print("Dog <{}> added.".format(rej_obj['dogName']))
+    print("Dog <{}> added.".format(req_obj['dogName']))
     return True
 
 """

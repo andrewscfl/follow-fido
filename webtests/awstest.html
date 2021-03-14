@@ -179,23 +179,18 @@
                   </div>
 
                   <div class="form-group">
-                    <label for="schedule-dog-day">Day</label>
-                    <input type="text" class="form-control" id="schedule-dog-day" placeholder="day">
-                  </div>
-
-                  <div class="form-group">
                     <label for="hour-schedule-dog">Hour</label>
                     <input type="text" class="form-control" id="hour-schedule-dog" placeholder="hour (military time)">
                   </div>
 
                   <div class="form-group">
                     <label for="dog-event-name-schedule-dog">event name</label>
-                    <input type="text" class="form-control" id="dog-event-name-schedule-dog" placeholder="event">
+                    <input type="text" class="form-control" id="dog-event-name-schedule-dog" placeholder="dog bio">
                   </div>
 
                   <div class="form-group">
                     <label for="dog-event-desc-schedule-dog">event description</label>
-                    <input type="text" class="form-control" id="dog-event-desc-schedule-dog" placeholder="event name">
+                    <input type="text" class="form-control" id="dog-event-desc-schedule-dog" placeholder="dog bio">
                   </div>
                 
                 <button type="submit" class="btn btn-default" id="schedEND">Submit</button>
@@ -206,7 +201,6 @@
                       let password = document.querySelector('#password-schedule-dog').value;
                       let dogName = document.querySelector('#dog-name-schedule-dog').value;
                       let hour = document.querySelector('#hour-schedule-dog').value;
-                      let day = document.querySelector('#schedule-dog-day').value;
                       let eventName = document.querySelector('#dog-event-name-schedule-dog').value;
                       let eventDesc = document.querySelector('#dog-event-desc-schedule-dog').value;
                       console.log(username.value,password.value);
@@ -214,7 +208,6 @@
                           "username": username,
                           "password": password,
                           "dogName": dogName,
-                          "day": day,
                           "hour": hour,
                           "eventName": eventName,
                           "eventDesc" : eventDesc
@@ -397,13 +390,6 @@
               </script>
         </div>
         <hr>
-
-
-
-
-
-
-        
 <style>
     hr{
         border-top: 12px solid #d2d2d2;
