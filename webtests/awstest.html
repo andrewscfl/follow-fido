@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html>
+    <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+<!-- Optional theme -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    <body>
+        <div class="container">
+            <h2>Test for /create endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="username-create">username</label>
+                  <input type="text" class="form-control" id="username-create" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="password-create">password</label>
+                    <input type="text" class="form-control" id="password-create" placeholder="password">
+                  </div>
+                
+                <button type="submit" class="btn btn-default" id="createEND">Submit</button>
+                <div id="create-output"></div>
+              <script>
+                  document.querySelector('#createEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#username-create').value;
+                      let password = document.querySelector('#password-create').value;
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password
+                      };
+                      fetch('http://localhost:5000/create', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#create-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#create-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+
+        <hr>
+
+        <div class="container">
+            <h2>Test for /login endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="username-login">username</label>
+                  <input type="text" class="form-control" id="username-login" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="password-login">password</label>
+                    <input type="text" class="form-control" id="password-login" placeholder="password">
+                  </div>
+                
+                <button type="submit" class="btn btn-default" id="logEND">Submit</button>
+                <div id="login-output"></div>
+              <script>
+                  document.querySelector('#logEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#username-login').value;
+                      let password = document.querySelector('#password-login').value;
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password
+                      };
+                      fetch('http://localhost:5000/login', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#login-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#login-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+        <div class="container">
+            <h2>Test for /registerdog endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="username-register-dog">username</label>
+                  <input type="text" class="form-control" id="username-register-dog" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="password-register-dog">password</label>
+                    <input type="text" class="form-control" id="password-register-dog" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-name-register-dog">Dog Name</label>
+                    <input type="text" class="form-control" id="dog-name-register-dog" placeholder="dog name">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-age-register-dog">Dog Name</label>
+                    <input type="text" class="form-control" id="dog-age-register-dog" placeholder="dog age">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-bio-register-dog">Dog Bio</label>
+                    <input type="text" class="form-control" id="dog-bio-register-dog" placeholder="dog bio">
+                  </div>
+                
+                <button type="submit" class="btn btn-default" id="regEND">Submit</button>
+                <div id="registerOutput"></div>
+              <script>
+                  document.querySelector('#regEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#username-register-dog').value;
+                      let password = document.querySelector('#password-register-dog').value;
+                      let dogName = document.querySelector('#dog-name-register-dog').value;
+                      let dogAge = document.querySelector('#dog-age-register-dog').value;
+                      let dogBio = document.querySelector('#dog-bio-register-dog').value;
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName,
+                          "dogAge": dogAge,
+                          "dogBio": dogBio,
+                          "dogSchedule" : []
+                      };
+                      fetch('http://localhost:5000/registerdog', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#registerOutput').innerHTML = "successful";
+                        else{
+                            document.querySelector('#registerOutput').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+
+
+        <div class="container">
+            <h2>Test for /scheduledog endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="username-schedule-dog">username</label>
+                  <input type="text" class="form-control" id="username-schedule-dog" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="password-schedule-dog">password</label>
+                    <input type="text" class="form-control" id="password-schedule-dog" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-name-schedule-dog">Dog Name</label>
+                    <input type="text" class="form-control" id="dog-name-schedule-dog" placeholder="dog name">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="hour-schedule-dog">Hour</label>
+                    <input type="text" class="form-control" id="hour-schedule-dog" placeholder="hour (military time)">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-event-name-schedule-dog">event name</label>
+                    <input type="text" class="form-control" id="dog-event-name-schedule-dog" placeholder="dog bio">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="dog-event-desc-schedule-dog">event description</label>
+                    <input type="text" class="form-control" id="dog-event-desc-schedule-dog" placeholder="dog bio">
+                  </div>
+                
+                <button type="submit" class="btn btn-default" id="schedEND">Submit</button>
+                <div id="sched-output"></div>
+              <script>
+                  document.querySelector('#schedEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#username-schedule-dog').value;
+                      let password = document.querySelector('#password-schedule-dog').value;
+                      let dogName = document.querySelector('#dog-name-schedule-dog').value;
+                      let hour = document.querySelector('#hour-schedule-dog').value;
+                      let eventName = document.querySelector('#dog-event-name-schedule-dog').value;
+                      let eventDesc = document.querySelector('#dog-event-desc-schedule-dog').value;
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName,
+                          "hour": hour,
+                          "eventName": eventName,
+                          "eventDesc" : eventDesc
+                      };
+                      fetch('http://localhost:5000/scheduledog', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#sched-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#sched-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+
+
+        <div class="container">
+            <h2>Test for /snapshot endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="username-snap">username</label>
+                  <input type="text" class="form-control" id="username-snap" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="password-snap">password</label>
+                    <input type="text" class="form-control" id="password-snap" placeholder="password">
+                  </div>
+
+                
+                <button type="submit" class="btn btn-default" id="snapEND">Submit</button>
+                <div id="snap-output"></div>
+              <script>
+                  document.querySelector('#snapEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#username-snap').value;
+                      let password = document.querySelector('#password-snap').value;
+                      
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password
+                      };
+                      fetch('http://localhost:5000/snapshot', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#snap-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#snap-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+
+
+        <div class="container">
+            <h2>Test for /deletedog endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="del-dog-username">username</label>
+                  <input type="text" class="form-control" id="del-dog-username" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="del-dog-password">password</label>
+                    <input type="text" class="form-control" id="del-dog-password" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-dog-name">dogName</label>
+                    <input type="text" class="form-control" id="del-dog-name" placeholder="dog name">
+                  </div>
+
+                
+                <button type="submit" class="btn btn-default" id="deldogEND">Submit</button>
+                <div id="del-dog-output"></div>
+              <script>
+                  document.querySelector('#deldogEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#del-dog-username').value;
+                      let password = document.querySelector('#del-dog-password').value;
+                      let dogName = document.querySelector('#del-dog-name').value;
+                      
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName
+                      };
+                      fetch('http://localhost:5000/deletedog', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#del-dog-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#del-dog-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+
+
+        <div class="container">
+            <h2>Test for /deleteschedule endpoint</h2>
+            
+                <div class="form-group">
+                  <label for="del-schedule-username">username</label>
+                  <input type="text" class="form-control" id="del-schedule-username" placeholder="username">
+                </div>
+                <div class="form-group">
+                    <label for="del-schedule-password">password</label>
+                    <input type="text" class="form-control" id="del-schedule-password" placeholder="password">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-schedule-dog-name">dogName</label>
+                    <input type="text" class="form-control" id="del-schedule-dog-name" placeholder="dog name">
+                  </div>
+
+                  <div class="form-group">
+                    <label for="del-schedule-event-name">dogName</label>
+                    <input type="text" class="form-control" id="del-schedule-event-name" placeholder="dog name">
+                  </div>
+
+                
+                <button type="submit" class="btn btn-default" id="delschedEND">Submit</button>
+                <div id="del-schedule-output"></div>
+              <script>
+                  document.querySelector('#delschedEND').addEventListener('click', ()=>{
+                      let username = document.querySelector('#del-schedule-username').value;
+                      let password = document.querySelector('#del-schedule-password').value;
+                      let dogName = document.querySelector('#del-schedule-dog-name').value;
+                      let eventName = document.querySelector('#del-schedule-event-name').value;
+                      
+                      console.log(username.value,password.value);
+                      let request = {
+                          "username": username,
+                          "password": password,
+                          "dogName": dogName,
+                          "eventName": eventName
+                      };
+                      fetch('http://localhost:5000/deleteschedule', {
+                          method: 'POST',
+                          headers: {
+                              'Content-Type': 'application/json'
+                          },
+                          mode: 'cors',
+                          body: JSON.stringify(request)
+                      }).then(res => res.json()).then(res => {
+                          if(res.success)
+                            document.querySelector('#del-schedule-output').innerHTML = "successful";
+                        else{
+                            document.querySelector('#del-schedule-output').innerHTML = "failed";
+
+                        }
+                      });
+                  });
+              </script>
+        </div>
+        <hr>
+<style>
+    hr{
+        border-top: 12px solid #d2d2d2;
+    }
+</style>
+    </body>
+</html>

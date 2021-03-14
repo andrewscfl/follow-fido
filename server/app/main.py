@@ -232,6 +232,7 @@ def _delete_sched_doc(sched, req_obj) -> bool:
     sd = sched[0].get('dogSchedule')
     new_sched = []
     
+<<<<<<< HEAD
     for e in sd:
         if e['eventName'] != req_obj['eventName']:
             new_sched.append(e)
@@ -240,6 +241,9 @@ def _delete_sched_doc(sched, req_obj) -> bool:
         "dogSchedule"   :   new_sched
     })
         
+=======
+    print("Dog <{}> added.".format(req_obj['dogName']))
+>>>>>>> 2c43382c908d05dfee81b8559f2e9c99f8920d24
     return True
 
 """
