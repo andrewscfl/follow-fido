@@ -186,7 +186,8 @@ def _schedule_dog(req_obj) -> bool:
         
     # Updating above document's contact array.
     sched = [r for r in root_schedule.where(
-        'ownerName', '==', req_obj['username']).stream()]
+        'ownerName', '==', req_obj['username']).where(
+            'dogName', '==', req_obj['dogName']).stream()]
 
     print("update_dog: type={}, data=<{}>".format(type(sched), sched))
     
@@ -259,8 +260,13 @@ def _compare_hash(single, username, passwd) -> bool:
 # More endpoints
 
 
-
-
+def _sched_snapshot(req_obj):
+        
+    schedules = [s for s in root_schedule.where(
+        'ownerName', '==', req_obj['username']).stream()]
+    
+    return [s.to_dict() for s in schedules]
+    
 #actual method
 def _snapshot(req_obj):
     print('got request')
@@ -271,12 +277,15 @@ def _snapshot(req_obj):
     docs = db.collection(u'pets').where(u'username', '==', username).stream()
     for doc in docs:
         new_dict = doc.to_dict()['dogs']
+        
+        _sched_snapshot(req_obj)
 
         # Return new_dict (list of dogs) if authenticated
         if _authenticate(req_obj):
             return {
-                "success": True,
-                "data" : new_dict
+                "success"   : True,
+                "data"      : new_dict,
+                "schedules" : _sched_snapshot(req_obj)
             }
             
         else:
@@ -285,7 +294,9 @@ def _snapshot(req_obj):
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
 def snapshot():
-    return _snapshot(request.json)
+    snap = _snapshot(request.json)
+    print(snap)
+    return(snap)
 
 
 #delete dog method 
