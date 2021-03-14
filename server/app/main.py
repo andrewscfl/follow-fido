@@ -24,12 +24,12 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 root_collection = db.collection(u'pets')
 
 #TODO comment here
-@app.route('/createsnapshot', methods=['POST'])
-@cross_origin()
-def auth_snapshot():
-    print('got request')
-    req_obj = request.json
-    print(req_obj)
+# @app.route('/createsnapshot', methods=['POST'])
+# @cross_origin()
+# def auth_snapshot():
+#     print('got request')
+#     req_obj = request.json
+#     print(req_obj)
 
     
 
@@ -43,14 +43,14 @@ def auth_snapshot():
     #             "data" : #array of dogs
     #         }
 
-def delete_dog()
-    print('got request')
-    req_obj = request.json
-    print(req_obj)
+# def delete_dog()
+#     print('got request')
+#     req_obj = request.json
+#     print(req_obj)
 
-    dog_name = req_obj['dog_Name']
+#     dog_name = req_obj['dog_Name']
 
-    _authenticate(dog_name)
+#     _authenticate(dog_name)
 
 
 #for excersise, meds, feeding, walks...
@@ -185,3 +185,32 @@ def _compare_hash(single, username, passwd) -> bool:
     req_hash = check_hash(username, passwd, fb_salt)
         
     return True if req_hash == fb_hash else False
+
+
+# More endpoints
+
+
+
+
+#actual method
+def _auth_snapshot(req_obj):
+    print('got request')
+    print(req_obj)
+    username = req_json['username']
+
+    docs = db.collection(u'pets').where(u'username', '==', username).stream()
+    for doc in docs:
+        new_dict = doc.to_dict()['dogs']
+        #take out username and passw
+        new_dict.pop(username)
+        print("username gone")
+        new_dict.pop(req_json['password'])
+        print("password gone")
+
+    return new_dict
+
+@app.route('/snapshot', methods=['POST'])
+@cross_origin()
+def auth_snapshot():
+    req_obj = request.json
+    return quietcatch(_auth_snapshot, req_obj)
