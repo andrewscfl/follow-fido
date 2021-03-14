@@ -215,6 +215,27 @@ def _add_to_schedule(sched, req_obj) -> bool:
     print("Event <{}> added.".format(req_obj['eventName']))
     return True
 
+def _delete_schedule(req_obj) -> bool:  
+        
+    # Updating above document's contact array.
+    sched = [r for r in root_schedule.where(
+        'ownerName', '==', req_obj['username']).where(
+            'dogName', '==', req_obj['dogName']).stream()]
+
+    print("update_dog: type={}, data=<{}>".format(type(sched), sched))
+    
+    print(len(sched))
+    return _delete_sched_doc(sched, req_obj) if len(sched) == 1 else False
+
+def _delete_sched_doc(sched, req_obj) -> bool:
+    
+    sd = sched[0].get('dogSchedule').to_dict()
+    
+    for i, _ in enumerate(sd):
+        print(sd[i]['eventName'])
+    
+    return True
+
 """
 Wrapper for authentication. Input the request object. Use this to 
 authenticate in each endpoint.
@@ -334,7 +355,7 @@ def delete_dog():
 
 #THIS IS UNFINISHED, UPDATE TOMORROW
 #delete SCHEDULE method 
-def _delete_schedule(req_obj):
+def __OLD_delete_schedule(req_obj):
     print('got request')
     print(req_obj)
     username = req_obj['username']
