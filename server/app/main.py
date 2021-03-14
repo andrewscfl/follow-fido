@@ -1,4 +1,4 @@
-import json, os
+import os
 # -- Flask libraries --     #
 from flask import Flask, request, jsonify
 from flask_cors import CORS, cross_origin
@@ -24,6 +24,7 @@ app.config['CORS_HEADERS'] = 'Content-Type'
 
 #you can use this in place of db.collection('pets') since everything is in pets
 root_collection = db.collection('pets')
+root_schedule   = db.collection('schedule')
 
 
 #   --  Endpoints   --  #
@@ -57,6 +58,15 @@ def login() -> dict:
     print(snap)
     return snap
 
+"""
+Endpoint to add a schedule to a dog.
+"""
+@app.route('/scheduledog', methods=['POST'])
+@cross_origin()
+def schedule_dog() -> dict:
+    
+    return quietcatch(_schedule_dog, request)
+
 
 #   --    Private methods     -- #
 """
@@ -83,13 +93,6 @@ def quietcatch(function, request) -> dict:
     
     # Package the success status in JSON syntax.
     return { "success" : stat }
-
-"""
-Actual method body to handle the logins.
-"""
-def _login(req_obj) -> bool:
-    print("Login successful")
-    return True    
 
 """
 Only create the user if they don't exist.
@@ -156,11 +159,87 @@ def _add_dog(user, req_obj) -> bool:
             "dogName"       : req_obj['dogName'],
             "dogAge"        : req_obj['dogAge'],
             "dogBio"        : req_obj['dogBio'],
-            "dogSchedule"   : []
+            #"dogSchedule"   : []
          }])
     })
-    
+                
     print("Dog <{}> added.".format(req_obj['dogName']))
+    return _create_dog_sched(req_obj)
+
+
+def _create_dog_sched(req_obj) -> bool:
+    
+    new_record = root_schedule.document()
+        
+    new_record.set({
+        'ownerName'   : req_obj['username'],
+        'dogName'     : req_obj['dogName'],
+        'dogSchedule' : []
+    })
+    
+    return True
+
+"""
+Add a dog's event to firebase.
+"""
+def _schedule_dog(req_obj) -> bool:  
+        
+    # Updating above document's contact array.
+    sched = [r for r in root_schedule.where(
+        'ownerName', '==', req_obj['username']).where(
+            'dogName', '==', req_obj['dogName']).stream()]
+
+    print("update_dog: type={}, data=<{}>".format(type(sched), sched))
+    
+    print(len(sched))
+    return _add_to_schedule(sched, req_obj) if len(sched) == 1 else False
+
+"""
+Insert an event to the user's document. Note that the user parameter is
+a one-sized list. (Prevents an IndexError in the prev. function)
+"""
+def _add_to_schedule(sched, req_obj) -> bool:
+   
+    print(req_obj['eventDesc']) 
+    print(sched[0].id)
+    root_schedule.document(sched[0].id).update({
+            
+        "dogSchedule"  : firestore.ArrayUnion([{
+            "day"       : req_obj['day'],
+            "hour"      : req_obj['hour'],
+            "eventName" : req_obj['eventName'],
+            "eventDesc" : req_obj['eventDesc']
+         }])
+    })
+      
+    print("Event <{}> added.".format(req_obj['eventName']))
+    return True
+
+def _delete_schedule(req_obj) -> bool:  
+        
+    # Updating above document's contact array.
+    sched = [r for r in root_schedule.where(
+        'ownerName', '==', req_obj['username']).where(
+            'dogName', '==', req_obj['dogName']).stream()]
+
+    print("update_dog: type={}, data=<{}>".format(type(sched), sched))
+    
+    print(len(sched))
+    return _delete_sched_doc(sched, req_obj) if len(sched) == 1 else False
+
+def _delete_sched_doc(sched, req_obj) -> bool:
+    
+    sd = sched[0].get('dogSchedule')
+    new_sched = []
+    
+    for e in sd:
+        if e['eventName'] != req_obj['eventName']:
+            new_sched.append(e)
+            
+    root_schedule.document(sched[0].id).update({
+        "dogSchedule"   :   new_sched
+    })
+        
     return True
 
 """
@@ -208,32 +287,43 @@ def _compare_hash(single, username, passwd) -> bool:
 # More endpoints
 
 
-
-
+def _sched_snapshot(req_obj):
+        
+    schedules = [s for s in root_schedule.where(
+        'ownerName', '==', req_obj['username']).stream()]
+    
+    return [s.to_dict() for s in schedules]
+    
 #actual method
 def _snapshot(req_obj):
     print('got request')
     print(req_obj)
     username = req_obj['username']
 
-    #grabs list of docs where matching username is true
+    # Grabs list of docs where matching username is true
     docs = db.collection(u'pets').where(u'username', '==', username).stream()
     for doc in docs:
         new_dict = doc.to_dict()['dogs']
+        
+        _sched_snapshot(req_obj)
 
-        # return new_dict (list of dogs) if authenticated
+        # Return new_dict (list of dogs) if authenticated
         if _authenticate(req_obj):
             return {
-                "success": True,
-                "data" : new_dict
+                "success"   : True,
+                "data"      : new_dict,
+                "schedules" : _sched_snapshot(req_obj)
             }
+            
         else:
             return { "success" : False }
 
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
 def snapshot():
-    return _snapshot(request.json)
+    snap = _snapshot(request.json)
+    print(snap)
+    return(snap)
 
 
 #delete dog method 
@@ -271,7 +361,7 @@ def delete_dog():
 
 #THIS IS UNFINISHED, UPDATE TOMORROW
 #delete SCHEDULE method 
-def _delete_schedule(req_obj):
+def __OLD_delete_schedule(req_obj):
     print('got request')
     print(req_obj)
     username = req_obj['username']
