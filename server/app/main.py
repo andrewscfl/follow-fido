@@ -10,6 +10,8 @@ from tools.authtool import make_auth, check_hash
 from tools.errtool import catchnoauth
 
 
+# TODO: Remove needless print statements at the end!
+
 # Firebase variables (global).
 cred = credentials.Certificate(".\sdkkey.json")
 firebase_admin.initialize_app(cred)
@@ -33,17 +35,6 @@ Creates a new user document.
 def create_endpoint() -> dict:
     
     return catchnoauth(_create, request.json)
-    """
-    # Can't authenticate a user who doesn't exist.
-    try:
-        stat = _create(request.json)
-    
-    except Exception as e:
-        print(str(e))
-        stat = False
-        
-    return { "success" : stat }
-    """
 
 """
 Adds a dog to a user's document.
@@ -94,6 +85,7 @@ def quietcatch(function, request) -> dict:
 Actual method body to handle the logins.
 """
 def _login(req_obj) -> bool:
+    print("Login successful")
     return True    
 
 """

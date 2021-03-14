@@ -1,8 +1,6 @@
 """
-If all goes well, return the boolean value from the 
-function. If any exception is raised, print it to the console
-and return a false. This should match the style that the
-frontend requires to determine success or failure.
+Send the standard success dict/json, but don't perform
+authentication. (Useful for user creation, for example.)
 """
 def catchnoauth(function, req_obj) -> dict:
     
