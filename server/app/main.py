@@ -20,7 +20,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-<<<<<<< HEAD
 #you can use this in place of db.collection('pets') since everything is in pets
 root_collection = db.collection(u'pets')
 
@@ -32,19 +31,17 @@ def auth_snapshot():
     req_obj = request.json
     print(req_obj)
 
-    username = req_obj['username']
-    password = req_obj['password']
-    salt = db.collection(u'pets').get()['hash']
+    
 
-    docs = db.collection(u'pets').where(u'username', '==', username).stream()
-    for doc in docs:
-        toDict = doc.to_dict()
-        make_auth(username, password, salt)
-        if username == toDict['username'] and password == toDict['password']:
-            return{
-                "success" : True
-                "data" : #array of dogs
-            }
+    # docs = db.collection(u'pets').where(u'username', '==', username).stream()
+    # for doc in docs:
+
+    #     _authenticate()
+    #     if username == toDict['username'] and password == toDict['password']:
+    #         return{
+    #             "success" : True
+    #             "data" : #array of dogs
+    #         }
 
 def delete_dog()
     print('got request')
@@ -52,6 +49,9 @@ def delete_dog()
     print(req_obj)
 
     dog_name = req_obj['dog_Name']
+
+    _authenticate(dog_name)
+
 
 #for excersise, meds, feeding, walks...
 # def schedule_dog():
@@ -78,7 +78,6 @@ def delete_dog()
 
 
 
-=======
 # Documents in collection hold all data.
 root_collection = db.collection('pets')
 
@@ -186,4 +185,3 @@ def _compare_hash(single, username, passwd) -> bool:
     req_hash = check_hash(username, passwd, fb_salt)
         
     return True if req_hash == fb_hash else False
->>>>>>> main
