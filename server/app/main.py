@@ -198,3 +198,31 @@ def _compare_hash(single, username, passwd) -> bool:
     print("Hash from user: {}\nHash from db: {}".format(stored, req_hash))
         
     return True if req_hash == fb_hash else False
+
+
+# More endpoints
+
+
+
+
+#actual method
+def _snapshot(req_obj):
+    print('got request')
+    print(req_obj)
+    username = req_obj['username']
+
+    #grabs list of docs where matching username is true
+    docs = db.collection(u'pets').where(u'username', '==', username).stream()
+    for doc in docs:
+        new_dict = doc.to_dict()['dogs']
+
+        # return new_dict (list of dogs) if authenticated
+        return {
+            "success": True,
+            "data" : new_dict
+        }
+
+@app.route('/snapshot', methods=['POST'])
+@cross_origin()
+def snapshot():
+    return _snapshot(request.json)
