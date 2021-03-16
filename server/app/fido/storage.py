@@ -1,7 +1,7 @@
 import os
 import firebase_admin as _FB_ADMIN
 from firebase_admin import credentials, firestore
-from tools.auth import make_auth, check_hash
+from auth import make_auth, check_hash
 
 
 # Firebase variables (global). Look in current directory.
@@ -16,6 +16,7 @@ _DB = firestore.client()
 _ROOT_COLLECTION = _DB.collection('pets')
 _ROOT_SCHEDULE   = _DB.collection('schedule')
 
+# Methods start here.
 def ep_action(route:str, request) -> dict:
     """
     Authenticates, then runs the requested "route" command. Returns a boolean

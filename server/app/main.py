@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from tools.error import catchnoauth
-from storage import ep_action, snapshot
+from fido.error import catchnoauth
+from fido.storage import ep_action, snapshot
 
 
 # Flask variables (global).
