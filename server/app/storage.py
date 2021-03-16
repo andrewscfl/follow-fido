@@ -18,12 +18,8 @@ _ROOT_SCHEDULE   = _DB.collection('schedule')
 
 def ep_action(route:str, request) -> dict:
     """
-    Use this in endpoints for authentication (better security) before running the
-    endpoints' functions. Note that the endpoint function should have an underscore
-    "_" in front of its name.
-
-    Returns True if the user authenticates, and the given function succeeds. If 
-    anything goes wrong, return False. 
+    Authenticates, then runs the requested "route" command. Returns a boolean
+    dict structure based on the given function's return value.
     """    
     
     routes = {
