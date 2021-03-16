@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from tools.errtool import catchnoauth
-from storage import quietcatch
+from storage import ep_action, snapshot
 
 
 # Flask variables (global).
@@ -26,7 +26,7 @@ Adds a dog to a user's document.
 @cross_origin()
 def register_dog() -> dict:
     
-    return quietcatch("registerdog", request)
+    return ep_action("registerdog", request)
 
 """
 Endpoint to handle login requests.
@@ -35,7 +35,6 @@ Endpoint to handle login requests.
 @cross_origin()
 def login() -> dict:
     
-    #return quietcatch(_login, request)
     return snapshot(request.json)
 
 """
@@ -45,7 +44,7 @@ Endpoint to add a schedule to a dog.
 @cross_origin()
 def schedule_dog() -> dict:
     
-    return quietcatch("scheduledog", request)
+    return ep_action("scheduledog", request)
 
 @app.route('/snapshot', methods=['POST'])
 @cross_origin()
@@ -53,15 +52,16 @@ def snapshot():
     
     return snapshot(request.json)
 
-#extra thing for quietcatch
+#extra thing for ep_action
 @app.route('/deletedog', methods=['POST'])
 @cross_origin()
 def delete_dog():
     
-    return quietcatch("deletedog", request)
+    return ep_action("deletedog", request)
 
-#extra thing for quietcatch
+#extra thing for ep_action
 @app.route('/deleteschedule', methods=['POST'])
 @cross_origin()
 def delete_schedule():
-    return quietcatch("deleteschedule", request)
+    
+    return ep_action("deleteschedule", request)

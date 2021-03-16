@@ -16,7 +16,7 @@ _DB = firestore.client()
 _ROOT_COLLECTION = _DB.collection('pets')
 _ROOT_SCHEDULE   = _DB.collection('schedule')
 
-def quietcatch(route:str, request) -> dict:
+def ep_action(route:str, request) -> dict:
     """
     Use this in endpoints for authentication (better security) before running the
     endpoints' functions. Note that the endpoint function should have an underscore
@@ -58,8 +58,11 @@ def snapshot(req_obj):
     # Grabs list of docs where matching username is true. Note that there
     # should only be one username.
     docs = _ROOT_COLLECTION.where('username', '==', username).stream()
+    num = len(docs)
     
-    print("")
+    print(
+        "WARNING: Multiple usernames detected." if num > 1 else "{}".format(num)
+    )
     
     new_dict = doc[0].to_dict()['dogs']
         
@@ -76,18 +79,16 @@ def snapshot(req_obj):
     else:
         return { "success" : False }
 
-"""
-Only create the user if they don't exist.
-"""
 def _create(req_obj) -> bool:
-    
+    """
+    Only create the user if they don't exist.
+    """    
     return False if _user_exists(req_obj['username']) else _add_user(req_obj)
 
-"""
-Check whether or not a user exists in the database.
-"""
 def _user_exists(username:str) -> bool:
-    
+    """
+    Check whether or not a user exists in the database.
+    """    
     single = [r for r in _ROOT_COLLECTION.where(
         "username", "==", username).stream()]
 
@@ -95,33 +96,27 @@ def _user_exists(username:str) -> bool:
     
     return True if len(single) > 0 else False
 
-"""
-Attempt to add the user's data to firebase.
-"""
+
 def _add_user(req_obj) -> bool:  
-          
+    """
+    Attempt to add the user's data to firebase.
+    """          
     new_record = _ROOT_COLLECTION.document()
     
-    salt, hash = make_auth(req_obj['username'], req_obj['password'])
-    
-    # TODO: Remove me when we test the salt and hash output.
-    print("salt: {}\nhash: {}".format(salt, hash))
-    
+    hash = make_auth(req_obj['username'], req_obj['password'])
+        
     new_record.set({
         'username'  : req_obj['username'],
-        'salt'      : salt,
         'hash'      : hash,
         'dogs'      : []
     })
     
     return True
 
-"""
-Add a dog to firebase.
-"""
 def _register_dog(req_obj) -> bool:  
-          
-    # Updating above document's contact array.
+    """
+    Add a dog to firebase.
+    """          
     user = [r for r in _ROOT_COLLECTION.where(
         'username', '==', req_obj['username']).stream()]
     
@@ -129,19 +124,20 @@ def _register_dog(req_obj) -> bool:
     
     return _add_dog(user, req_obj) if len(user) == 1 else False
 
-"""
-Insert a dog to the user's document. Note that the user parameter is
-a one-sized list. (Prevents an IndexError in the prev. function)
-"""
 def _add_dog(user, req_obj) -> bool:
+    """
+    Insert a dog to the user's document. Note that the user parameter is
+    a one-sized list. (Prevents an IndexError in the prev. function)
     
+    Note: Add the dogSchedule array below, if you want to try to manage that
+    method. (Not my recommendation.)  --R.H.
+    """    
     _ROOT_COLLECTION.document(user[0].id).update({
             
         "dogs"  : firestore.ArrayUnion([{
             "dogName"       : req_obj['dogName'],
             "dogAge"        : req_obj['dogAge'],
             "dogBio"        : req_obj['dogBio'],
-            #"dogSchedule"   : []
          }])
     })
                 
@@ -161,11 +157,10 @@ def _create_dog_sched(req_obj) -> bool:
     
     return True
 
-"""
-Add a dog's event to firebase.
-"""
 def _schedule_dog(req_obj) -> bool:  
-        
+    """
+    Add a dog's event to firebase.
+    """        
     # Updating above document's contact array.
     sched = [r for r in _ROOT_SCHEDULE.where(
         'ownerName', '==', req_obj['username']).where(
@@ -176,12 +171,11 @@ def _schedule_dog(req_obj) -> bool:
     print(len(sched))
     return _add_to_schedule(sched, req_obj) if len(sched) == 1 else False
 
-"""
-Insert an event to the user's document. Note that the user parameter is
-a one-sized list. (Prevents an IndexError in the prev. function)
-"""
 def _add_to_schedule(sched, req_obj) -> bool:
-   
+    """
+    Insert an event to the user's document. Note that the user parameter is
+    a one-sized list. (Prevents an IndexError in the prev. function)
+    """   
     print(req_obj['eventDesc']) 
     print(sched[0].id)
     _ROOT_SCHEDULE.document(sched[0].id).update({
@@ -224,12 +218,11 @@ def _delete_sched_doc(sched, req_obj) -> bool:
         
     return True
 
-"""
-Wrapper for authentication. Input the request object. Use this to 
-authenticate in each endpoint.
-"""
 def _authenticate(req_json) -> bool:
-
+    """
+    Wrapper for authentication. Input the request object. Use this to 
+    authenticate in each endpoint.
+    """
     username = req_json['username']
     passwd = req_json['password']
     
@@ -239,35 +232,20 @@ def _authenticate(req_json) -> bool:
         
     num_docs = len(single)
     
-    print("single: type={}, len={}".format(single, num_docs))
-
     # Throw an error message if more than one doc is detected.
     print("WARNING: {} docs found. Address this in the database.".format(
         num_docs) if num_docs > 1 else "{} document(s) found.".format(num_docs)
     )
     
-    return _compare_hash(single, username, passwd) if len(single) == 1 else False
+    return _compare_hash(single, username, passwd) if num_docs == 1 else False
 
-"""
-Returns True if the stored hash matches the checked hash.
-Note: Leave "single" unlabeled.
-"""
+
 def _compare_hash(single, username, passwd) -> bool:
-    
-    stored = single[0].to_dict()
-        
-    fb_salt = stored['salt']
-    fb_hash = stored['hash']
-        
-    req_hash = check_hash(username, passwd, fb_salt)
-    
-    print("Hash from user: {}\nHash from db: {}".format(stored, req_hash))
-        
-    return True if req_hash == fb_hash else False
-
-
-# More endpoints
-
+    """
+    Only run this if one document is obtained.
+    """
+    stored_hash = single[0].to_dict()['hash']   
+    return check_hash(username, passwd, stored_hash)
 
 def _sched_snapshot(req_obj):
         

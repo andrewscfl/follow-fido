@@ -1,54 +1,15 @@
-import bcrypt
+from passlib import pbkdf2_sha256 as sha256
 
-"""
-Generates a new salt, hash tuple.
-"""
-def make_auth(username:str, passwd:str) -> tuple:
 
-    salt = bcrypt.gensalt()
-    hashed = bcrypt.hashpw(_to_bytes(username, passwd), salt)
-    
-    return salt, hashed
+def get_hash(username:str, passwd:str) -> str:
+    """
+    Passlib generates a random salt for every hash. So, you don't have to store
+    or manage a separate "salt" field in the database.
+    """
+    return sha256.hash(username + passwd)
 
-"""
-username and passwd should come from the frontend request.
-salt should come from the document field ("salt").
-"""
-def check_hash(username:str, passwd:str, salt:str) -> str:
-    
-    return bcrypt.hashpw(_to_bytes(username, passwd), salt)
-
-# Convert the concatenated user-pass to bytes-like object.
-def _to_bytes(username:str, password:str) -> bytes:
-    
-    return (username + password).encode('utf-8')
-
-''' Do NOT use the crypt library (more secure) on Windows. It will break.
-import crypt
-from hmac import compare_digest
-
-"""
-Generates a new salt, hash tuple.
-"""
-def make_auth(username:str, passwd:str) -> tuple:
-
-    userpass = username + passwd
-    
-    salt = crypt.mksalt(crypt.METHOD_SHA512)
-    pwhash = crypt.crypt(userpass, salt)
-    
-    return salt, pwhash
-
-"""
-username and passwd should come from the frontend request.
-salt should come from the document field ("salt").
-"""
-def check_hash(username:str, passwd:str, salt:str) -> str:
-    
-    return crypt.crypt(username + passwd, salt)
-
-# Convert the concatenated user-pass to bytes-like object.
-def _to_bytes(username:str, password:str) -> bytes:
-    
-    return (username + password).encode('utf-8')
-'''
+def check_hash(username:str, passwd:str, sha_hash:str) -> bool:
+    """
+    Compare the stored hash versus the user/pass combination given by the user.
+    """
+    return sha256.hash(str(username)+str(passwd), str(sha_hash))
