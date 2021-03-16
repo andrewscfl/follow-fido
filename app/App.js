@@ -15,54 +15,19 @@ class App extends React.Component {
       loggedIn: null,
       username: null,
       password: null,
+      day: null,
+      hour: null,
+      eventName: null,
+      eventDesc: null,
       "dogName": null,
       "dogAge": null,
       "dogBio": null,
 
-      dogs: [{
-        "dogName": "spot",
-        "dogAge": 2,
-        "dogBio": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the ",
-        "dogSchedule": [
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "taking a shit on the carpet",
-            "eventDesc": "*violent sound of shitting*"
-
-          },
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "lick my own ass",
-            "eventDesc": "yum"
-
-          },
-          {
-            "day": 1,
-            "time": 1300,
-            "eventName": "eat shoes",
-            "eventDesc": "delicious"
-
-          }
-        ]
-      }, {
-        "dogName": "Levi",
-        "dogAge": 6,
-        "dogBio": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the ",
-        "dogSchedule": [
-          {
-            "day": 2,
-            "time": 1100,
-            "eventName": "bark In The park",
-            "eventDesc": "a dog barks in the park or smth idk"
-
-          }
-        ]
-      },]
+      dogs: []
     }
-
   }
+
+
 
   HomeScreenCardHelper = (navigate) => {
     let returnVal = this.state.dogs.map((dog) => {
@@ -77,7 +42,7 @@ class App extends React.Component {
 
   CaroselCardHelper = (routeData) => {
     let cardList = routeData.dogSchedule.map((eventVar) => {
-      return(<CaroselCard day={eventVar.day} time={eventVar.time} name={eventVar.eventName} desc={eventVar.eventDesc} />);
+      return (<CaroselCard day={eventVar.day} time={eventVar.time} name={eventVar.eventName} desc={eventVar.eventDesc} />);
     });
     return cardList;
   }
@@ -117,6 +82,11 @@ class App extends React.Component {
       },
       calendarHead: {
         backgroundColor: '#375459',
+        flexDirection: 'row',
+        alignContent: 'center',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        padding: 10
       },
       scheduleText: {
         color: 'white',
@@ -163,6 +133,9 @@ class App extends React.Component {
           <View style={styles.calendarWrapper}>
             <View style={styles.calendarHead}>
               <Text style={styles.scheduleText}>Schedule</Text>
+              <TouchableOpacity onPress={() => {
+                navigation.navigate('Event');
+              }}><Text style={{ color: 'white', fontSize: 25 }}>+</Text></TouchableOpacity>
             </View>
             <ScrollView horizontal={true}>
               {this.CaroselCardHelper(routeData)}
@@ -174,14 +147,14 @@ class App extends React.Component {
       );
     }
     else {
-      return (<View><Text>BRUH</Text></View>);
+      return (<View><Text></Text></View>);
     }
 
 
 
   }
 
-  Register = () => {
+  Register = ({ navigation: { navigate } }) => {
     return (
       <View style={{ padding: 30 }}>
         <Text style={{ fontSize: 35, marginBottom: 25 }}>Register Dog</Text>
@@ -217,6 +190,43 @@ class App extends React.Component {
         }}
           onPress={() => {
             //CODE HERE FOR POSTING UP REGISTRATION
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/registerdog', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({
+                "username": this.state.username,
+                "password": this.state.password,
+                "dogName": this.state.dogName,
+                "dogAge": this.state.dogAge,
+                "dogBio": this.state.dogBio,
+                "dogSchedule": []
+              })
+            }).then(res => res.json()).then(res => {
+
+
+              this.setState({ loggedIn: false });
+              this.setState({ dogs: null })
+
+            }).catch().finally(() => {
+              fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/snapshot', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                body: JSON.stringify({ "username": this.state.username, "password": this.state.password })
+              }).then(res => res.json()).then(res => {
+                console.log(res);
+                if (res.success) {
+                  navigate('Home')
+
+                }
+              }).catch();
+            });
+
           }}
 
         >
@@ -229,6 +239,110 @@ class App extends React.Component {
     );
   }
 
+  RegisterEvent = ({ navigation: { navigate } }) => {
+    return (
+      <ScrollView>
+      <View style={{ padding: 30 }}>
+        <Text style={{ fontSize: 35, marginBottom: 25 }}>Schedule Event</Text>
+        <Text
+          style={{ fontSize: 25, paddingBottom: 15, paddingTop: 15 }}
+        >dog name</Text>
+        <TextInput style={{ borderColor: 'grey', borderWidth: 1, padding: 5 }}
+          onChangeText={(text) => this.setState({ dogName: text })}
+          value={this.state.dogName}
+        />
+        <Text
+          style={{ fontSize: 25, paddingBottom: 15, paddingTop: 15 }}
+        >day</Text>
+        <TextInput style={{ borderColor: 'grey', borderWidth: 1, padding: 5 }}
+          onChangeText={(text) => this.setState({ day: text })}
+          value={this.state.day}
+        />
+        <Text
+          style={{ fontSize: 25, paddingBottom: 15, paddingTop: 15 }}
+        >hour</Text>
+        <TextInput style={{ borderColor: 'grey', borderWidth: 1, padding: 5 }}
+          onChangeText={(text) => this.setState({ hour: text })}
+          value={this.state.hour}
+        />
+
+        <Text
+          style={{ fontSize: 25, paddingBottom: 15, paddingTop: 15 }}
+        >event name</Text>
+        <TextInput style={{ borderColor: 'grey', borderWidth: 1, padding: 5 }}
+          onChangeText={(text) => this.setState({ eventName: text })}
+          value={this.state.eventName}
+        />
+
+<Text
+          style={{ fontSize: 25, paddingBottom: 15, paddingTop: 15 }}
+        >event description</Text>
+        <TextInput style={{ borderColor: 'grey', borderWidth: 1, padding: 5 }}
+          onChangeText={(text) => this.setState({ eventDesc: text })}
+          value={this.state.eventDesc}
+        />
+
+        <TouchableOpacity style={{
+          backgroundColor: '#45C3D6',
+          paddingHorizontal: 20,
+          paddingVertical: 10,
+          borderRadius: 5,
+          marginTop: 30,
+
+        }}
+          onPress={() => {
+            //CODE HERE FOR POSTING UP REGISTRATION
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/scheduledog', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({
+                "username": this.state.username,
+                "password": this.state.password,
+                "dogName": this.state.dogName,
+                "day": parseInt(this.state.day),
+                "hour": parseInt(this.state.hour),
+                "eventName": this.state.eventName,
+                "eventDesc": this.state.eventDesc
+              })
+            }).then(res => res.json()).then(res => {
+
+
+              this.setState({ loggedIn: false });
+              this.setState({ dogs: null })
+
+            }).catch().finally(() => {
+              fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/snapshot', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                mode: 'cors',
+                body: JSON.stringify({ "username": this.state.username, "password": this.state.password })
+              }).then(res => res.json()).then(res => {
+                console.log(res);
+                if (res.success) {
+                  navigate('Home')
+
+                }
+              }).catch();
+            });
+
+          }}
+
+        >
+          <View>
+            <Text style={{ fontSize: 25, color: 'white' }}>Send To Server</Text>
+          </View>
+        </TouchableOpacity>
+
+      </View>
+      </ScrollView>
+    );
+  }
+
 
   Logo = () => {
     return (<Image resizeMode="contain" style={{ width: 100, height: 100 }} source={require('./assets/inverselogo.png')} />)
@@ -237,6 +351,8 @@ class App extends React.Component {
 
 
   HomeScreenCards = ({ navigation: { navigate } }) => {
+
+
     return (
       <View style={{
         flex: 1,
@@ -287,9 +403,38 @@ class App extends React.Component {
 
         }}
           onPress={() => {
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({ "username": this.state.username, "password": this.state.password })
+            }).then(res => res.json()).then(res => {
+              if (res.success) {
+
+              }
+            }).catch();
+
+            fetch('http://ec2-35-171-9-33.compute-1.amazonaws.com:5000/snapshot', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              mode: 'cors',
+              body: JSON.stringify({ "username": this.state.username, "password": this.state.password })
+            }).then(res => res.json()).then(res => {
+              console.log(res);
+              if (res.success) {
+                this.setState({ loggedIn: true });
+                this.setState({ dogs: res.data });
+                navigate('Home')
+              }
+            }).catch();
+
+
             //CODE HERE FOR POSTING UP Login for simplicities sake this will treat as if it worked
-            this.setState({ loggedIn: true });
-            navigate('Home')
+
           }}
 
         >
@@ -338,6 +483,8 @@ class App extends React.Component {
           }) : <View></View>} />
           <Stack.Screen name="Profile" component={this.Profile} />
           <Stack.Screen name="Register" component={this.Register} />
+          <Stack.Screen name="Event" component={this.RegisterEvent} />
+
         </Stack.Navigator>
       </NavigationContainer>
     );
