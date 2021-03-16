@@ -20,6 +20,10 @@ def ep_action(route:str, request) -> dict:
     """
     Authenticates, then runs the requested "route" command. Returns a boolean
     dict structure based on the given function's return value.
+    
+    TODO: Break this into its own "api.py" script, with snapshot being an entry
+    in the routes dict. (This will also mean cleaning up the way it returns 
+    data.)
     """    
     
     routes = {
