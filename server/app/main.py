@@ -1,6 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from tools.errtool import catchnoauth
+from tools.error import catchnoauth
 from storage import ep_action, snapshot
 
 

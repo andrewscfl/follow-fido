@@ -1,7 +1,7 @@
 import os
 import firebase_admin as _FB_ADMIN
 from firebase_admin import credentials, firestore
-from tools.authtool import make_auth, check_hash
+from tools.auth import make_auth, check_hash
 
 
 # Firebase variables (global). Look in current directory.
