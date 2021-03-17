@@ -50,6 +50,12 @@ def ep_action(route:str, request) -> dict:
     # Package the success status in JSON syntax.
     return { "success" : stat }
 
+# TODO: Convert this into a wrapper.
+def _to_json_bool(function, args) -> dict:
+    
+    return {"success" : function(args)}
+
+# TODO: Convert this into a private method within storage.
 def snapshot(req_obj):
     """
     Get the state of the database, JSON-like.
@@ -205,14 +211,24 @@ def _delete_schedule(req_obj) -> bool:
     return _delete_sched_doc(sched, req_obj) if len(sched) == 1 else False
 
 def _delete_sched_doc(sched, req_obj) -> bool:
+    """
+    Deletes an event from a dog's schedule.
     
+    Note: This method uses the "schedule" collection. To revert to the schedule
+    array within the user's dogs' array, use another method. (Not recommended.)
+    -- R.H.
+    """
     sd = sched[0].get('dogSchedule')
     new_sched = []
     
+    # Rebuild the event array.
     for e in sd:
+        
+        # Rebuild by appending all except the "deleted" event.
         if e['eventName'] != req_obj['eventName']:
             new_sched.append(e)
-            
+    
+    # Update ONLY the event array in the collection.     
     _ROOT_SCHEDULE.document(sched[0].id).update({
         "dogSchedule"   :   new_sched
     })
