@@ -2,6 +2,7 @@ import os
 import firebase_admin as _FB_ADMIN
 from firebase_admin import credentials, firestore
 from .auth import get_hash, check_hash
+from functools import wraps
 
 
 # Firebase variables (global). Look in current directory.
@@ -25,6 +26,7 @@ def ep_action(route:str, request) -> dict:
     TODO: Break this into its own "api.py" script, with snapshot being an entry
     in the routes dict. (This will also mean cleaning up the way it returns 
     data.)
+    TODO: Integrate `login` and `snapshot` (they both just call "snapshot")
     """    
     routes = {
         "registerdog"   : _register_dog,
@@ -49,20 +51,12 @@ def ep_action(route:str, request) -> dict:
     # Package the success status in JSON syntax.
     return { "success" : stat }
 
-# TODO: Convert this into a wrapper.
-def _to_json_bool(truth:bool) -> dict:
-    
-    return { "success" : truth }
-
 # TODO: Convert this into a private method within storage.
 def get_snapshot(req_obj):
     """
     Get the state of the database, JSON-like.
     """
     docs = _get_user_doc(req_obj['username'])
-
-    print(docs)
-    print(_sched_snapshot(req_obj))
 
     # Return new_dict (list of dogs) if authenticated.
     if _authenticate(req_obj) and docs:
@@ -77,26 +71,33 @@ def get_snapshot(req_obj):
 
 def _get_user_doc(username:str):
     """
-    There should only be one doc per user. Handle exceptions for
-    more than one doc in this method body.
+    Get the user's document (one doc per user). This is used in nearly every
+    function in this module.
     """
     return _get_user_docs(username)[0] if _get_user_docs(username) else None
 
 def _get_user_docs(username:str) -> list:
     """
     Only get docs where the username is true.
-    This is used in nearly every private function in this module.
-    TODO: Add to other methods once this is tested.
-    TODO: Handle exceptions/warnings for multple docs for a given user.
     """
     return [d for d in _ROOT_COLLECTION.where('username', '==', username).stream()]
 
+# TODO: Use this above every True/False return value (to the server).
+def json_bool(f) -> dict:
+    
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        return dict(success=f(*args, **kwargs))
+    
+    return wrapper
+
+# TODO: Move this to a separate module.
+@json_bool
 def create(req_obj) -> dict:
     """
     Only create the user if they don't exist.
     """
-    return _to_json_bool(
-        False if _user_exists(req_obj['username']) else _add_user(req_obj))
+    return False if _user_exists(req_obj['username']) else _add_user(req_obj)
 
 def _user_exists(username:str) -> bool:
     """
@@ -130,7 +131,7 @@ def _register_dog(req_obj) -> bool:
     Add a dog to firebase.
     """          
     user = _get_user_doc(req_obj['username'])
-        
+    
     return _add_dog(user, req_obj) if user else False
 
 def _add_dog(user, req_obj) -> bool:
@@ -149,6 +150,7 @@ def _add_dog(user, req_obj) -> bool:
     print("Dog <{}> added.".format(req_obj['dogName']))
     return _create_dog_sched(req_obj)
 
+# Todo: figure out if this should just integrate with the previous method.
 def _create_dog_sched(req_obj) -> bool:
     
     new_record = _ROOT_SCHEDULE.document()
@@ -165,7 +167,9 @@ def _schedule_dog(req_obj) -> bool:
     """
     Add a dog's event to firebase.
     """        
-    # Updating above document's contact array.
+    # Updating above document's contact array. 
+    # TODO: Move to a helper method. 
+    # TODO: Rework the len() == 1 thing.
     sched = [r for r in _ROOT_SCHEDULE.where(
         'ownerName', '==', req_obj['username']).where(
             'dogName', '==', req_obj['dogName']).stream()]
@@ -210,10 +214,6 @@ def _delete_schedule(req_obj) -> bool:
 def _delete_sched_doc(sched, req_obj) -> bool:
     """
     Deletes an event from a dog's schedule.
-    
-    Note: This method uses the "schedule" collection. To revert to the schedule
-    array within the user's dogs' array, use another method. (Not recommended.)
-    -- R.H.
     """
     sd = sched[0].get('dogSchedule')
     new_sched = []
@@ -232,6 +232,7 @@ def _delete_sched_doc(sched, req_obj) -> bool:
         
     return True
 
+# TODO: Rename this (something like "authenticate user hash.")
 def _authenticate(req_json) -> bool:
     """
     Use this to authenticate every endpoint except /create.
