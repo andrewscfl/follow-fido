@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
 from fido.error import catchnoauth
-from fido.storage import ep_action, get_snapshot, create
+from fido.storage import ep_action, create
 
 
 # Flask variables (global).
@@ -35,7 +35,7 @@ Endpoint to handle login requests.
 @cross_origin()
 def login() -> dict:
     
-    return get_snapshot(request.json)
+    return ep_action("login", request)
 
 """
 Endpoint to add a schedule to a dog.
@@ -50,7 +50,7 @@ def schedule_dog() -> dict:
 @cross_origin()
 def snapshot():
     
-    return get_snapshot(request.json)
+    return ep_action("snapshot", request)
 
 #extra thing for ep_action
 @app.route('/deletedog', methods=['POST'])

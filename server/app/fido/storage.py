@@ -1,3 +1,4 @@
+import json
 import os
 import firebase_admin as _FB_ADMIN
 from firebase_admin import credentials, firestore
@@ -26,11 +27,16 @@ def ep_action(route:str, request) -> dict:
     TODO: Break this into its own "api.py" script, with snapshot being an entry
     in the routes dict. (This will also mean cleaning up the way it returns 
     data.)
-    TODO: Integrate `login` and `snapshot` (they both just call "snapshot")
+    
+    TODO: Make this a wrapper. The endpoints functions will return one of the
+    strings in the routes table. The wrapper will automatically fetch the
+    request object.
     """    
     routes = {
+        "login"         : _get_snapshot,
         "registerdog"   : _register_dog,
         "scheduledog"   : _schedule_dog,
+        "snapshot"      : _get_snapshot,
         "deletedog"     : _delete_dog,
         "deleteschedule": _delete_schedule
     }
@@ -41,25 +47,22 @@ def ep_action(route:str, request) -> dict:
 
     # If the function runs, return success.
     try:
-        stat = routes[route](req_obj) if _authenticate(req_obj) else False 
+        return routes[route](req_obj) if _authenticate(req_obj) else dict(success=False)
     
     # Return false for any exception.
     except Exception as e:
         print(str(e))
-        stat = False
-    
-    # Package the success status in JSON syntax.
-    return { "success" : stat }
+        return dict(success=False)
 
 # TODO: Convert this into a private method within storage.
-def get_snapshot(req_obj):
+def _get_snapshot(req_obj) -> dict:
     """
     Get the state of the database, JSON-like.
     """
     docs = _get_user_doc(req_obj['username'])
 
     # Return new_dict (list of dogs) if authenticated.
-    if _authenticate(req_obj) and docs:
+    if docs:
         return {
             "success"   : True,
             "data"      : docs.to_dict(),
@@ -77,26 +80,28 @@ def _get_user_doc(username:str):
     return _get_user_docs(username)[0] if _get_user_docs(username) else None
 
 def _get_user_docs(username:str) -> list:
-    """
-    Only get docs where the username is true.
-    """
+    
+    """ Only get docs where the username is true. """
+    
     return [d for d in _ROOT_COLLECTION.where('username', '==', username).stream()]
 
 # TODO: Use this above every True/False return value (to the server).
+# TODO: Move this to a separate module.
+# TODO: Make a wrapper to print each dict to console.
 def json_bool(f) -> dict:
-    
+    """
+    Returns a boolean in the JSON frontend format.
+    """
     @wraps(f)
     def wrapper(*args, **kwargs):
         return dict(success=f(*args, **kwargs))
-    
     return wrapper
 
-# TODO: Move this to a separate module.
 @json_bool
 def create(req_obj) -> dict:
-    """
-    Only create the user if they don't exist.
-    """
+    
+    """ Only create a new user if they don't exist. """
+    
     return False if _user_exists(req_obj['username']) else _add_user(req_obj)
 
 def _user_exists(username:str) -> bool:
@@ -126,18 +131,19 @@ def _add_user(req_obj) -> bool:
     
     return True
 
+@json_bool
 def _register_dog(req_obj) -> bool:  
+    """ 
+    Add a dog to firebase. 
     """
-    Add a dog to firebase.
-    """          
+              
     user = _get_user_doc(req_obj['username'])
     
     return _add_dog(user, req_obj) if user else False
 
 def _add_dog(user, req_obj) -> bool:
-    """
-    Insert a dog to the user's document.
-    """    
+    """ Insert a dog to the user's document. """  
+      
     _ROOT_COLLECTION.document(user.id).update({
             
         "dogs"  : firestore.ArrayUnion([{
@@ -163,10 +169,10 @@ def _create_dog_sched(req_obj) -> bool:
     
     return True
 
+@json_bool
 def _schedule_dog(req_obj) -> bool:  
-    """
-    Add a dog's event to firebase.
-    """        
+    """ Add a dog's event to firebase. """
+            
     # Updating above document's contact array. 
     # TODO: Move to a helper method. 
     # TODO: Rework the len() == 1 thing.
@@ -199,6 +205,7 @@ def _add_to_schedule(sched, req_obj) -> bool:
     print("Event <{}> added.".format(req_obj['eventName']))
     return True
 
+@json_bool
 def _delete_schedule(req_obj) -> bool:  
         
     # Updating above document's contact array.
@@ -252,6 +259,7 @@ def _sched_snapshot(req_obj):
     
     return [s.to_dict() for s in schedules]
 
+@json_bool
 #delete dog method 
 def _delete_dog(req_obj):
     print('got request')
