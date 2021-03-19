@@ -27,7 +27,6 @@ def ep_action(route:str, request) -> dict:
     data.)
     """    
     routes = {
-        #"create"        : _create,
         "registerdog"   : _register_dog,
         "scheduledog"   : _schedule_dog,
         "deletedog"     : _delete_dog,
@@ -53,35 +52,35 @@ def ep_action(route:str, request) -> dict:
 # TODO: Convert this into a wrapper.
 def _to_json_bool(truth:bool) -> dict:
     
-    return {"success" : truth}
+    return { "success" : truth }
 
 # TODO: Convert this into a private method within storage.
 def get_snapshot(req_obj):
     """
     Get the state of the database, JSON-like.
     """
-    docs = _get_user_docs(req_obj['username'])
-    num = len(docs)
-    
-    # Notify if the database has too many documents.
-    print(
-        "WARNING: Multiple usernames detected." if num > 1 else "{}".format(num)
-    )
-    
-    new_dict = docs[0].to_dict()
-    print(new_dict)
+    docs = _get_user_doc(req_obj['username'])
+
+    print(docs)
     print(_sched_snapshot(req_obj))
 
     # Return new_dict (list of dogs) if authenticated.
-    if _authenticate(req_obj):
+    if _authenticate(req_obj) and docs:
         return {
             "success"   : True,
-            "data"      : new_dict,
+            "data"      : docs.to_dict(),
             "schedules" : _sched_snapshot(req_obj)
         }
             
     else:
         return { "success" : False }
+
+def _get_user_doc(username:str):
+    """
+    There should only be one doc per user. Handle exceptions for
+    more than one doc in this method body.
+    """
+    return _get_user_docs(username)[0] if _get_user_docs(username) else None
 
 def _get_user_docs(username:str) -> list:
     """
@@ -96,18 +95,18 @@ def create(req_obj) -> dict:
     """
     Only create the user if they don't exist.
     """
-    return _to_json_bool(False if _user_exists(req_obj['username']) else _add_user(req_obj))
+    return _to_json_bool(
+        False if _user_exists(req_obj['username']) else _add_user(req_obj))
 
 def _user_exists(username:str) -> bool:
     """
     Check whether or not a user exists in the database.
     """    
-    single = [r for r in _ROOT_COLLECTION.where(
-        "username", "==", username).stream()]
+    single = _get_user_docs(username)
 
-    print("Username is taken" if len(single) > 0 else "Creating user.")    
+    print("Username is taken" if single else "Creating user.")    
     
-    return True if len(single) > 0 else False
+    return True if single else False
 
 def _add_user(req_obj) -> bool:  
     """
@@ -130,22 +129,15 @@ def _register_dog(req_obj) -> bool:
     """
     Add a dog to firebase.
     """          
-    user = [r for r in _ROOT_COLLECTION.where(
-        'username', '==', req_obj['username']).stream()]
-    
-    print("update_dog: type={}, data=<{}>".format(type(user), user))
-    
-    return _add_dog(user, req_obj) if len(user) == 1 else False
+    user = _get_user_doc(req_obj['username'])
+        
+    return _add_dog(user, req_obj) if user else False
 
 def _add_dog(user, req_obj) -> bool:
     """
-    Insert a dog to the user's document. Note that the user parameter is
-    a one-sized list. (Prevents an IndexError in the prev. function)
-    
-    Note: Add the dogSchedule array below, if you want to try to manage that
-    method. (Not my recommendation.)  --R.H.
+    Insert a dog to the user's document.
     """    
-    _ROOT_COLLECTION.document(user[0].id).update({
+    _ROOT_COLLECTION.document(user.id).update({
             
         "dogs"  : firestore.ArrayUnion([{
             "dogName"       : req_obj['dogName'],
@@ -156,7 +148,6 @@ def _add_dog(user, req_obj) -> bool:
                 
     print("Dog <{}> added.".format(req_obj['dogName']))
     return _create_dog_sched(req_obj)
-
 
 def _create_dog_sched(req_obj) -> bool:
     
@@ -243,32 +234,15 @@ def _delete_sched_doc(sched, req_obj) -> bool:
 
 def _authenticate(req_json) -> bool:
     """
-    Wrapper for authentication. Input the request object. Use this to 
-    authenticate in each endpoint.
+    Use this to authenticate every endpoint except /create.
     """
     username = req_json['username']
     passwd = req_json['password']
-    
-    # Should return either 0 or 1 documents.
-    single = [r for r in _ROOT_COLLECTION.where(
-        "username", "==", username).stream()]
+
+    single = _get_user_doc(username)
         
-    num_docs = len(single)
-    
-    # Throw an error message if more than one doc is detected.
-    print("WARNING: {} docs found. Address this in the database.".format(
-        num_docs) if num_docs > 1 else "{} document(s) found.".format(num_docs)
-    )
-    
-    return _compare_hash(single, username, passwd) if num_docs == 1 else False
-
-
-def _compare_hash(single, username, passwd) -> bool:
-    """
-    Only run this if one document is obtained.
-    """
-    stored_hash = single[0].to_dict()['hash']   
-    return check_hash(username, passwd, stored_hash)
+    return check_hash(
+        username, passwd, single.to_dict()['hash']) if single else False
 
 def _sched_snapshot(req_obj):
         
@@ -298,7 +272,7 @@ def _delete_dog(req_obj):
                 obj_ref['dogs'].pop(i)
                 print("doge is delet")
                 # print(doc.id)
-                temp = db.collection(u'pets').document(doc.id)
+                temp = _ROOT_COLLECTION.document(doc.id)
                 temp.update({'dogs' : obj_ref['dogs']})
                 print('updated')
                 return True

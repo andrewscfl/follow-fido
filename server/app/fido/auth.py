@@ -12,4 +12,4 @@ def check_hash(username:str, passwd:str, sha_hash:str) -> bool:
     """
     Compare the stored hash versus the user/pass combination given by the user.
     """
-    return sha256.verify((str(username) + str(passwd)), str(sha_hash))
+    return sha256.verify("{}{}".format(username, passwd), sha_hash)
