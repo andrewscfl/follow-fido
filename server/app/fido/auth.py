@@ -1,4 +1,4 @@
-from passlib import pbkdf2_sha256 as sha256
+from passlib.hash import pbkdf2_sha256 as sha256  # Could also import sha256_crypt.
 
 
 def get_hash(username:str, passwd:str) -> str:
@@ -12,4 +12,4 @@ def check_hash(username:str, passwd:str, sha_hash:str) -> bool:
     """
     Compare the stored hash versus the user/pass combination given by the user.
     """
-    return sha256.hash(str(username)+str(passwd), str(sha_hash))
+    return sha256.verify((str(username) + str(passwd)), str(sha_hash))

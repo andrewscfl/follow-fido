@@ -1,4 +1,4 @@
 flask
 flask_cors
 firebase_admin
-bcrypt
+passlib

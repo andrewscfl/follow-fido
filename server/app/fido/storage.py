@@ -1,7 +1,7 @@
 import os
 import firebase_admin as _FB_ADMIN
 from firebase_admin import credentials, firestore
-from auth import make_auth, check_hash
+from .auth import get_hash, check_hash
 
 
 # Firebase variables (global). Look in current directory.
@@ -26,9 +26,8 @@ def ep_action(route:str, request) -> dict:
     in the routes dict. (This will also mean cleaning up the way it returns 
     data.)
     """    
-    
     routes = {
-        "create"        : _create,
+        #"create"        : _create,
         "registerdog"   : _register_dog,
         "scheduledog"   : _schedule_dog,
         "deletedog"     : _delete_dog,
@@ -37,7 +36,8 @@ def ep_action(route:str, request) -> dict:
     
     # Jsonify the request.
     req_obj = request.json
-    
+    print(req_obj)
+
     # If the function runs, return success.
     try:
         stat = routes[route](req_obj) if _authenticate(req_obj) else False 
@@ -51,29 +51,26 @@ def ep_action(route:str, request) -> dict:
     return { "success" : stat }
 
 # TODO: Convert this into a wrapper.
-def _to_json_bool(function, args) -> dict:
+def _to_json_bool(truth:bool) -> dict:
     
-    return {"success" : function(args)}
+    return {"success" : truth}
 
 # TODO: Convert this into a private method within storage.
-def snapshot(req_obj):
+def get_snapshot(req_obj):
     """
     Get the state of the database, JSON-like.
     """
-    username = req_obj['username']
-
-    # Grabs list of docs where matching username is true. Note that there
-    # should only be one username.
-    docs = _ROOT_COLLECTION.where('username', '==', username).stream()
+    docs = _get_user_docs(req_obj['username'])
     num = len(docs)
     
+    # Notify if the database has too many documents.
     print(
         "WARNING: Multiple usernames detected." if num > 1 else "{}".format(num)
     )
     
-    new_dict = doc[0].to_dict()['dogs']
-        
-    _sched_snapshot(req_obj)
+    new_dict = docs[0].to_dict()
+    print(new_dict)
+    print(_sched_snapshot(req_obj))
 
     # Return new_dict (list of dogs) if authenticated.
     if _authenticate(req_obj):
@@ -86,11 +83,20 @@ def snapshot(req_obj):
     else:
         return { "success" : False }
 
-def _create(req_obj) -> bool:
+def _get_user_docs(username:str) -> list:
+    """
+    Only get docs where the username is true.
+    This is used in nearly every private function in this module.
+    TODO: Add to other methods once this is tested.
+    TODO: Handle exceptions/warnings for multple docs for a given user.
+    """
+    return [d for d in _ROOT_COLLECTION.where('username', '==', username).stream()]
+
+def create(req_obj) -> dict:
     """
     Only create the user if they don't exist.
-    """    
-    return False if _user_exists(req_obj['username']) else _add_user(req_obj)
+    """
+    return _to_json_bool(False if _user_exists(req_obj['username']) else _add_user(req_obj))
 
 def _user_exists(username:str) -> bool:
     """
@@ -103,14 +109,14 @@ def _user_exists(username:str) -> bool:
     
     return True if len(single) > 0 else False
 
-
 def _add_user(req_obj) -> bool:  
     """
     Attempt to add the user's data to firebase.
     """          
     new_record = _ROOT_COLLECTION.document()
     
-    hash = make_auth(req_obj['username'], req_obj['password'])
+    hash = get_hash(req_obj['username'], req_obj['password'])
+    print("{} created.".format(req_obj['username']))
         
     new_record.set({
         'username'  : req_obj['username'],
