@@ -1,11 +1,11 @@
 from .storage import get_snapshot, register_dog, schedule_dog, delete_dog, delete_schedule, authenticate, user_exists, add_user
 from .wrappers import json_bool
 
+
 # Methods start here.
 def ep_action(route:str, request) -> dict:
     """
-    Authenticates, then runs the requested "route" command. Returns a boolean
-    dict structure based on the given function's return value.
+    Authenticates, then runs the requested "route" command.
     
     TODO: Make this a wrapper. The endpoint functions will return one of the
     strings in the routes table. The wrapper will automatically fetch the
@@ -14,7 +14,7 @@ def ep_action(route:str, request) -> dict:
     TODO: Rename this function.
     """    
     routes = {
-        "login"         : get_snapshot,
+        "login"         : get_snapshot,  # TODO: Make a sep't login function anyway.
         "registerdog"   : register_dog,
         "scheduledog"   : schedule_dog,
         "snapshot"      : get_snapshot,
@@ -37,7 +37,9 @@ def ep_action(route:str, request) -> dict:
     
 @json_bool
 def create(req_obj) -> dict:
-    
-    """ Only create a new user if they don't exist. """
+    """ 
+    Only create a new user if they don't exist. No authentication because the user
+    doesn't yet exist.
+    """
     
     return False if user_exists(req_obj['username']) else add_user(req_obj)

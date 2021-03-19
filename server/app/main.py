@@ -1,7 +1,6 @@
 from flask import Flask, request
 from flask_cors import CORS, cross_origin
-from fido.error import catchnoauth
-from fido.storage import ep_action, create
+from fido.api import ep_action, create
 
 
 # Flask variables (global).
@@ -9,7 +8,6 @@ app = Flask(__name__)
 cors = CORS(app)
 app.config['CORS_HEADERS'] = 'Content-Type'
 
-#   --  Endpoints   --  #
 """
 Creates a new user document.
 """
